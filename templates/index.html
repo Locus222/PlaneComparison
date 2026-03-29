@@ -252,12 +252,39 @@
     .col-mp, .col-ec, .col-hr { }
     body.view-economy   .col-mp { display: none; }
     body.view-economy   .col-hr { display: none; }
+    body.view-economy   .col-cmp { display: none; }
     body.view-maxpower  .col-ec { display: none; }
     body.view-maxpower  .col-hr { display: none; }
+    body.view-maxpower  .col-cmp { display: none; }
     body.view-hourrates .col-mp { display: none; }
     body.view-hourrates .col-ec { display: none; }
+    body.view-hourrates .col-cmp { display: none; }
+    body.view-compare   .col-mp { display: none; }
+    body.view-compare   .col-ec { display: none; }
+    body.view-compare   .col-hr { display: none; }
 
-    /* ── Payload badge v action-baru ─────────────────────────── */
+    /* Badge Režim v Compare view */
+    .cmp-badge {
+      display: inline-block; padding: 1px 7px; border-radius: 10px;
+      font-size: .82em; font-weight: 700; letter-spacing: .04em;
+    }
+    .cmp-badge.mp { background: #1a2a3a; color: #4db8e8; border: 1px solid #2a4a6a; }
+    .cmp-badge.ec { background: #1a2a1a; color: #6dd46d; border: 1px solid #2a5a2a; }
+
+    /* ── Přepínač typu letadla (All / SEP / MEP) ────────────────── */
+    #type-filter { display: flex; gap: 0; border: 1px solid #3a4050; border-radius: 6px; overflow: hidden; width: fit-content; }
+    #type-filter input[type="radio"] { display: none; }
+    #type-filter label {
+      padding: 5px 14px; font-size: .92em; font-weight: 600;
+      color: #8a9ab5; background: #1a1d23; cursor: pointer;
+      border-right: 1px solid #3a4050; transition: background .15s, color .15s;
+      user-select: none; white-space: nowrap;
+    }
+    #type-filter label:last-of-type { border-right: none; }
+    #type-filter input[type="radio"]:checked + label { background: #2a2a1a; color: #d4b84a; }
+    #type-filter label:hover { background: #272d3a; color: #c0c8d8; }
+
+    /* Payload badge v action-baru */
     #payload-display {
       display: inline-flex; align-items: center; gap: 6px;
       background: #1e2a1e; border: 1px solid #3a5a3a; border-radius: 6px;
@@ -363,7 +390,7 @@
         </div>
         <div class="field">
           <label>Prům. váha osoby (kg)</label>
-          <input type="number" id="person_weight_kg" value="76" step="1" min="40"/>
+          <input type="number" id="person_weight_kg" value="95" step="1" min="40"/>
         </div>
         <div class="field">
           <label>Prům. zavazadlo/sedadlo (kg)</label>
@@ -489,7 +516,7 @@
         <!-- PAX 1 – pilot -->
         <div class="field">
           <label>Pilot – váha (kg)</label>
-          <input type="number" class="pax-input" id="pax1_weight" value="100" step="1" min="0"/>
+          <input type="number" class="pax-input" id="pax1_weight" value="95" step="1" min="0"/>
         </div>
         <div class="field">
           <label>Pilot – zavazadlo (kg)</label>
@@ -583,12 +610,22 @@
       <button id="btn-compute">▶ Vypočítat</button>
       <button id="toggle-unsuitable">Zobrazit nevhodná</button>
       <div class="view-slider" id="view-slider" style="margin-left:8px;">
-        <input type="radio" name="view_mode" id="vm-mp"  value="maxpower" checked/>
+        <input type="radio" name="view_mode" id="vm-mp"  value="maxpower"/>
         <label for="vm-mp">⚡ Max Power</label>
         <input type="radio" name="view_mode" id="vm-ec"  value="economy"/>
         <label for="vm-ec">🍃 Economy</label>
+        <input type="radio" name="view_mode" id="vm-cmp" value="compare" checked/>
+        <label for="vm-cmp">⚖ Compare</label>
         <input type="radio" name="view_mode" id="vm-hr"  value="hourrates"/>
         <label for="vm-hr">🕐 Hour Rates</label>
+      </div>
+      <div id="type-filter" style="margin-left:8px;" title="Filtrovat podle typu letadla">
+        <input type="radio" name="type_filter" id="tf-all" value="all" checked/>
+        <label for="tf-all">All</label>
+        <input type="radio" name="type_filter" id="tf-sep" value="SEP"/>
+        <label for="tf-sep">SEP</label>
+        <input type="radio" name="type_filter" id="tf-mep" value="MEP"/>
+        <label for="tf-mep">MEP</label>
       </div>
       <div id="payload-display" style="display:none;">
         <span class="pd-label">Payload:</span>
@@ -605,6 +642,7 @@
             <th colspan="5">Hmotnosti</th>
             <th colspan="11" class="col-mp">⚡ Max Power (75 %)</th>
             <th colspan="11" class="col-ec">🍃 Economy Cruise (55 %)</th>
+            <th colspan="12" class="col-cmp">⚖ Compare (nejlevnější profil)</th>
             <th colspan="9" class="col-hr">🕐 Hour Rates</th>
           </tr>
           <tr id="col-headers">
@@ -645,6 +683,19 @@
             <th data-col="ec_stops"      class="col-ec">Mezipřistání<span class="sort-arrow"></span></th>
             <th data-col="ec_total_time" class="col-ec">Celk. doba cesty<span class="sort-arrow"></span></th>
             <th class="col-ec"></th>
+            <!-- compare -->
+            <th data-col="cmp_mode"         class="col-cmp">Režim<span class="sort-arrow"></span></th>
+            <th data-col="cmp_load_reserve" class="col-cmp">Load Reserve (<span class="wt-unit">kg</span>)<span class="sort-arrow"></span></th>
+            <th data-col="cmp_v_kt"         class="col-cmp">V (<span class="spd-unit">kt</span>)<span class="sort-arrow"></span></th>
+            <th data-col="cmp_ff_lph"       class="col-cmp">Spotr. (<span class="ffph-unit">l</span>/h)<span class="sort-arrow"></span></th>
+            <th data-col="cmp_fob_l"        class="col-cmp">FOB (<span class="vol-unit">l</span>)<span class="sort-arrow"></span></th>
+            <th data-col="cmp_trip_fuel_l"  class="col-cmp">Trip Fuel (<span class="vol-unit">l</span>)<span class="sort-arrow"></span></th>
+            <th data-col="cmp_fuel_cost"    class="col-cost-header col-cmp">Nákl. palivo (<span class="cost-sym">Kč</span>)<span class="sort-arrow"></span></th>
+            <th data-col="cmp_plane_cost"   class="col-cost-header col-cmp">Nákl. letadlo (<span class="cost-sym">Kč</span>)<span class="sort-arrow"></span></th>
+            <th data-col="cmp_total"        class="col-cost-header col-cmp">Celkem (<span class="cost-sym">Kč</span>)<span class="sort-arrow"></span></th>
+            <th data-col="cmp_time"         class="col-cmp">Doba letu<span class="sort-arrow"></span></th>
+            <th data-col="cmp_stops"        class="col-cmp">Mezipřistání<span class="sort-arrow"></span></th>
+            <th data-col="cmp_total_time"   class="col-cmp">Celk. doba cesty<span class="sort-arrow"></span></th>
             <!-- hour rates -->
             <th data-col="hr_mp_ff_lph"       class="col-hr">Spotr. MP (<span class="ffph-unit">l</span>/h)<span class="sort-arrow"></span></th>
             <th data-col="hr_mp_fuel_cost_ph"  class="col-cost-header col-hr">Palivo MP (<span class="cost-sym">Kč</span>/h)<span class="sort-arrow"></span></th>
@@ -727,19 +778,27 @@ function updateFrozenCols() {
 window.addEventListener('resize', updateFrozenCols);
 
 /* ── View-mode slider ─────────────────────────────────────────────────── */
-const VIEW_CLASSES = ['view-maxpower', 'view-economy', 'view-hourrates'];
+const VIEW_CLASSES = ['view-maxpower', 'view-economy', 'view-compare', 'view-hourrates'];
 
 function applyViewMode(value) {
   VIEW_CLASSES.forEach(c => document.body.classList.remove(c));
   if (value === 'maxpower')  document.body.classList.add('view-maxpower');
   if (value === 'economy')   document.body.classList.add('view-economy');
+  if (value === 'compare')   document.body.classList.add('view-compare');
   if (value === 'hourrates') document.body.classList.add('view-hourrates');
 }
 
 document.querySelectorAll('input[name="view_mode"]').forEach(radio => {
   radio.addEventListener('change', () => applyViewMode(radio.value));
 });
-applyViewMode('maxpower');
+applyViewMode('compare');
+
+// Přepínač typu letadla All / SEP / MEP
+document.querySelectorAll('input[name="type_filter"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
+  });
+});
 
 /* ── Tabs ─────────────────────────────────────────────────────────────── */
 let hangarLoaded = false;
@@ -831,13 +890,23 @@ document.getElementById('toggle-unsuitable').addEventListener('click', () => {
 });
 
 /* ── Sorting ──────────────────────────────────────────────────────────── */
-let sortCol = 'ec_total', sortAsc = true;
+let sortCol = 'cmp_total', sortAsc = true;
 let lastPlanes = [];
+
+/** Vrátí { mode: 'MP'|'EC', p: profil } – profil s nižší total_cost. */
+function _cmpProfile(mp, ec) {
+  const mpCost = mp.total_cost ?? Infinity;
+  const ecCost = ec.total_cost ?? Infinity;
+  if (mpCost <= ecCost) return { mode: 'MP', p: mp };
+  return { mode: 'EC', p: ec };
+}
 
 function getColVal(plane, col) {
   const mp = plane.max_power   || {};
   const ec = plane.econ_cruise || {};
   const hr = plane.hour_rates  || {};
+  // Compare: zvolíme profil s nižší celkovou cenou
+  const cmp = _cmpProfile(mp, ec);
   const m = {
     type: plane.type, manufacturer: plane.manufacturer,
     designation: plane.designation, name: plane.name,
@@ -846,7 +915,6 @@ function getColVal(plane, col) {
     mtow: parseFloat(plane.mtow) || 0,
     useful_load: parseFloat(plane.useful_load) || 0,
     fuel_cap_l: parseFloat(plane.fuel_cap_l) || 0,
-    /* payload_kg: plane.payload_kg, */
     suitable: plane.suitable ? 0 : 1,
     mp_v_kt: mp.v_kt, mp_v_kmh: mp.v_kmh, mp_ff_lph: mp.ff_lph,
     mp_fob_l: mp.fob_l,
@@ -864,6 +932,14 @@ function getColVal(plane, col) {
     hr_ec_ff_lph: hr.ec_ff_lph, hr_ec_fuel_cost_ph: hr.ec_fuel_cost_ph,
     hr_plane_cost_ph: hr.plane_cost_ph,
     hr_mp_total_ph: hr.mp_total_ph, hr_ec_total_ph: hr.ec_total_ph,
+    cmp_mode: cmp.mode,
+    cmp_v_kt: cmp.p.v_kt, cmp_ff_lph: cmp.p.ff_lph,
+    cmp_fob_l: cmp.p.fob_l, cmp_trip_fuel_l: cmp.p.trip_fuel_l,
+    cmp_fuel_cost: cmp.p.fuel_cost, cmp_plane_cost: cmp.p.plane_cost,
+    cmp_total: cmp.p.total_cost,
+    cmp_time: cmp.p.flight_time_h, cmp_stops: cmp.p.stops,
+    cmp_total_time: cmp.p.total_time_h,
+    cmp_load_reserve: cmp.p.load_reserve_kg,
   };
   return m[col] ?? null;
 }
@@ -899,6 +975,10 @@ function renderTable(planes, currencySymbol) {
   updateCostHeaders(currentCurrencySymbol);
   updateUnitHeaders();
 
+  // Filtr typu letadla (All / SEP / MEP)
+  const typeFilter = document.querySelector('input[name="type_filter"]:checked')?.value || 'all';
+  const filtered = typeFilter === 'all' ? planes : planes.filter(p => p.type === typeFilter);
+
   // update sort arrows
   document.querySelectorAll('#col-headers th[data-col]').forEach(th => {
     const arrow = th.querySelector('.sort-arrow');
@@ -907,7 +987,7 @@ function renderTable(planes, currencySymbol) {
   });
 
   // sort
-  const sorted = [...planes].sort((a, b) => {
+  const sorted = [...filtered].sort((a, b) => {
     const va = getColVal(a, sortCol), vb = getColVal(b, sortCol);
     if (va == null && vb == null) return 0;
     if (va == null) return 1; if (vb == null) return -1;
@@ -915,12 +995,19 @@ function renderTable(planes, currencySymbol) {
     return sortAsc ? va - vb : vb - va;
   });
 
-  // find best (suitable, lowest ec_total)
-  const suitable = sorted.filter(p => p.suitable && p.econ_cruise?.total_cost != null);
+  // find best (suitable, lowest cmp_total)
+  const suitable = sorted.filter(p => p.suitable);
   let bestIdx = -1;
   if (suitable.length) {
-    const best = suitable.reduce((a, b) => a.econ_cruise.total_cost < b.econ_cruise.total_cost ? a : b);
-    bestIdx = sorted.indexOf(best);
+    const best = suitable.filter(p => {
+      const c = _cmpProfile(p.max_power || {}, p.econ_cruise || {});
+      return c.p.total_cost != null;
+    }).reduce((a, b) => {
+      const ca = _cmpProfile(a.max_power || {}, a.econ_cruise || {}).p.total_cost;
+      const cb = _cmpProfile(b.max_power || {}, b.econ_cruise || {}).p.total_cost;
+      return ca <= cb ? a : b;
+    }, suitable[0]);
+    bestIdx = best ? sorted.indexOf(best) : -1;
   }
 
   const tbody = document.getElementById('table-body');
@@ -928,6 +1015,8 @@ function renderTable(planes, currencySymbol) {
     const mp = p.max_power   || {};
     const ec = p.econ_cruise || {};
     const hr = p.hour_rates  || {};
+    const cmp = _cmpProfile(mp, ec);
+    const cp  = cmp.p;
     const suitable_cls = p.suitable ? '' : ' unsuitable';
     const best_cls     = idx === bestIdx ? ' best-row' : '';
     const typeColor = p.suitable ? '#6fd96f' : '#d06060';
@@ -936,13 +1025,15 @@ function renderTable(planes, currencySymbol) {
     const seatsStyle     = p.fail_seats ? ' style="text-align:center;color:#d06060;font-weight:700"' : ' style="text-align:center"';
     const usefulStyle    = p.fail_load  ? ' style="text-align:right;color:#d06060;font-weight:700"'  : ' style="text-align:right"';
 
-    // Nevyhovující výkonnostní profil – všechny buňky profilu červeně
-    // Vyhovující profil na unsuitable řádku – zachová normální barvu (col-ok)
     const mpFail = p.fail_load_mp ? ' col-fail' : (!p.suitable ? ' col-ok' : '');
     const ecFail = p.fail_load_ec ? ' col-fail' : (!p.suitable ? ' col-ok' : '');
+    const cmpFail = (cmp.mode === 'MP' ? p.fail_load_mp : p.fail_load_ec) ? ' col-fail' : (!p.suitable ? ' col-ok' : '');
 
-    const mpWarn = mp.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${mp.needed_fuel_l} l">⚠</span>` : '';
-    const ecWarn = ec.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${ec.needed_fuel_l} l">⚠</span>` : '';
+    const mpWarn  = mp.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${mp.needed_fuel_l} l">⚠</span>` : '';
+    const ecWarn  = ec.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${ec.needed_fuel_l} l">⚠</span>` : '';
+    const cmpWarn = cp.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${cp.needed_fuel_l} l">⚠</span>` : '';
+
+    const modeBadge = `<span class="cmp-badge ${cmp.mode.toLowerCase()}">${cmp.mode}</span>`;
 
     return `<tr class="${suitable_cls}${best_cls}">
       <td class="col-frozen" style="color:${typeColor};font-weight:700">${p.type}</td>
@@ -978,6 +1069,18 @@ function renderTable(planes, currencySymbol) {
       <td style="text-align:center" class="col-ec${ecFail} ${ec.stops > 0 ? 'stops-some' : 'stops-none'}">${ec.stops != null ? ec.stops : '–'}</td>
       <td style="text-align:center" class="col-ec${ecFail}">${ec.total_time_fmt || '–'}</td>
       <td class="col-ec${ecFail}">${ecWarn}</td>
+      <td style="text-align:center" class="col-cmp${cmpFail}">${modeBadge}</td>
+      <td style="text-align:right;font-weight:600" class="col-cmp${cmpFail} ${cp.load_reserve_kg != null && cp.load_reserve_kg < 0 ? 'load-reserve-neg' : 'load-reserve-pos'}">${cp.load_reserve_kg != null ? fmtWt(cp.load_reserve_kg) : '–'}</td>
+      <td style="text-align:right" class="col-cmp${cmpFail}">${fmtSpd(cp.v_kt, cp.v_kmh)}</td>
+      <td style="text-align:right" class="col-cmp${cmpFail}">${fmtFfph(cp.ff_lph)}</td>
+      <td style="text-align:right" class="col-cmp${cmpFail}">${fmtVol(cp.fob_l)}</td>
+      <td style="text-align:right" class="col-cmp${cmpFail}">${fmtVol(cp.trip_fuel_l)}</td>
+      <td style="text-align:right" class="col-cmp${cmpFail}">${fmtMoney(cp.fuel_cost)}</td>
+      <td style="text-align:right" class="col-cmp${cmpFail}">${fmtMoney(cp.plane_cost)}</td>
+      <td style="text-align:right" class="col-cmp${cmpFail}"><strong>${fmtMoney(cp.total_cost)}</strong></td>
+      <td style="text-align:center" class="col-cmp${cmpFail}">${cp.flight_time_fmt || '–'}</td>
+      <td style="text-align:center" class="col-cmp${cmpFail} ${cp.stops > 0 ? 'stops-some' : 'stops-none'}">${cp.stops != null ? cp.stops : '–'}</td>
+      <td style="text-align:center" class="col-cmp${cmpFail}">${cp.total_time_fmt || '–'}</td>
       <td style="text-align:right" class="col-hr">${fmtFfph(hr.mp_ff_lph)}</td>
       <td style="text-align:right" class="col-hr">${fmtMoney(hr.mp_fuel_cost_ph)}</td>
       <td style="text-align:right" class="col-hr">${fmtFfph(hr.ec_ff_lph)}</td>
@@ -994,17 +1097,25 @@ function renderTable(planes, currencySymbol) {
 
 
   // Summary
-  const total   = planes.length;
-  const ok      = planes.filter(p => p.suitable).length;
+  const total   = filtered.length;
+  const ok      = filtered.filter(p => p.suitable).length;
   document.getElementById('sum-count').innerHTML =
     `Zobrazeno: <strong>${ok} vhodných</strong> z ${total} letadel`;
 
   if (suitable.length) {
-    const cheapest = suitable.reduce((a,b) => (a.econ_cruise.total_cost||Infinity) < (b.econ_cruise.total_cost||Infinity) ? a : b);
+    const cheapest = suitable.filter(p => {
+      const c = _cmpProfile(p.max_power || {}, p.econ_cruise || {});
+      return c.p.total_cost != null;
+    }).reduce((a, b) => {
+      const ca = _cmpProfile(a.max_power || {}, a.econ_cruise || {}).p.total_cost;
+      const cb = _cmpProfile(b.max_power || {}, b.econ_cruise || {}).p.total_cost;
+      return ca <= cb ? a : b;
+    });
+    const cheapestCmp = _cmpProfile(cheapest.max_power || {}, cheapest.econ_cruise || {});
     const fastest  = suitable.filter(p => p.econ_cruise?.flight_time_h)
                              .reduce((a,b) => a.econ_cruise.flight_time_h < b.econ_cruise.flight_time_h ? a : b);
     document.getElementById('sum-cheapest').innerHTML =
-      `Nejlevnější: <strong>${cheapest.designation} ${cheapest.name}</strong> – ${fmtMoney(cheapest.econ_cruise.total_cost)} (economy)`;
+      `Nejlevnější: <strong>${cheapest.designation} ${cheapest.name}</strong> – ${fmtMoney(cheapestCmp.p.total_cost)} (${cheapestCmp.mode})`;
     document.getElementById('sum-fastest').innerHTML =
       `Nejrychlejší: <strong>${fastest.designation} ${fastest.name}</strong> – ${fastest.max_power.flight_time_fmt} (max power)`;
   } else {

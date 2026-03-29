@@ -29,9 +29,9 @@ def _seats(page) -> int:
 
 
 def test_initial_crew_total(page):
-    """Výchozí hodnoty: pilot 100+5, PAX2 65+5 = 175 kg, 2 sedadla."""
+    """Výchozí hodnoty: pilot 95+5, PAX2 65+5 = 170 kg, 2 sedadla."""
     _go_crew(page)
-    assert _total_kg(page) == 175.0
+    assert _total_kg(page) == 170.0
     assert _seats(page) == 2
 
 
@@ -40,7 +40,7 @@ def test_add_pax3(page):
     _go_crew(page)
     _fill(page, "pax3_weight", 80)
     _fill(page, "pax3_baggage", 10)
-    assert _total_kg(page) == 265.0   # 175 + 90
+    assert _total_kg(page) == 260.0   # 170 + 90
     assert _seats(page) == 3
 
 
@@ -189,9 +189,9 @@ def test_payload_badge_visible_on_page_load(page):
         timeout=2_000,
     )
     payload_text = page.locator("#payload-value").inner_text().replace("\u00a0", " ")
-    # Výchozí: 100+5+65+5 = 175 kg
-    assert "175" in payload_text, \
-        f"Výchozí payload badge měl zobrazit 175, ale zobrazuje: {payload_text!r}"
+    # Výchozí: 95+5+65+5 = 170 kg
+    assert "170" in payload_text, \
+        f"Výchozí payload badge měl zobrazit 170, ale zobrazuje: {payload_text!r}"
 
 
 # ── Počet sedadel jako podmínka vhodnosti ─────────────────────────────────────

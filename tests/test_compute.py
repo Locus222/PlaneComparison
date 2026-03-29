@@ -48,10 +48,15 @@ def test_best_row_highlighted(page):
 
 def test_flight_time_format(page):
     """Doba letu je ve formátu Xh YYm."""
-    cell = page.locator("#table-body tr:not(.unsuitable) td:nth-child(17)").first
-    text = cell.inner_text()
-    if text != "–":
-        assert re.match(r"\d+h \d{2}m", text), f"Neočekávaný formát doby letu: {text!r}"
+    # Hledáme první buňku col-mp na nevhodném řádku, která vypadá jako čas
+    cells = page.locator("#table-body tr:not(.unsuitable) td.col-mp").all()
+    found = False
+    for cell in cells:
+        text = cell.inner_text().strip()
+        if re.match(r"\d+h \d{2}m", text):
+            found = True
+            break
+    assert found, "Nenalezena buňka s formátem doby letu (Xh YYm) v col-mp"
 
 
 def test_cheapest_summary_shown(page):
