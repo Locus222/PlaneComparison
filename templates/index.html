@@ -1088,10 +1088,12 @@ document.querySelectorAll('input[name="weight_unit"], input[name="volume_unit"]'
   .forEach(r => r.addEventListener('change', () => {
     updateUnitHeaders();
     if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
+    refreshHangarHeaders();
   }));document.querySelectorAll('input[name="speed_unit"]')
   .forEach(r => r.addEventListener('change', () => {
     updateUnitHeaders();
     if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
+    refreshHangarHeaders();
   }));
 updateUnitHeaders();
 
@@ -1198,19 +1200,26 @@ async function doCompute() {
 document.getElementById('btn-compute').addEventListener('click', doCompute);
 
 /* ── Hangár ───────────────────────────────────────────────────────────── */
-// Definice skupin sloupců: [label, [klíče], první klíč skupiny dostane hg-sep]
-const HG_GROUPS = [
-  { label: 'Identifikace',   keys: ['type','Manufacturer','Designation','Name'] },
-  { label: 'Konfigurace',    keys: ['No. Seats','Gear Type','Fuel type'] },
-  { label: 'Rozměry (m)',    keys: ['wingspan [m]','length [m]','height [m]'] },
-  { label: 'Hmotnosti (kg)', keys: ['Empty Weight [kg]','MTOW [kg]','Usefull Load [kg]'] },
-  { label: 'Nádrž',         keys: ['Fuel Capacity [liters]','Fuel Capacity [gal US]'] },
-  { label: 'Motor',          keys: ['Engine Manufacturer','Engine type','No. pistons','Engine power [HP]','Engine power [kW]'] },
-  { label: 'Rychlosti (kt)', keys: ['Vcruise 75%','Vcruise 65%','Vcruise 55%','Stall Speed Vs0 (FF)','Vno – Normal operating speed','Vne – Never exceed speed'] },
-  { label: 'Dolet (NM)',     keys: ['Range max power [NM]','Range economy cruise[NM]'] },
-  { label: 'Spotřeba (gph)', keys: ['FuelFlow_75_gph','FuelFlow_55_gph'] },
-  { label: 'Náklady (CZK)',  keys: ['Fixed cost 80h/y [CZK]','Variable cost 80h/y [CZK]'] },
-];
+// HG_GROUPS se generuje dynamicky, aby záhlaví skupin odrážela zvolené jednotky
+function getHgGroups() {
+  const wu    = WEIGHT_LABELS[getWeightUnit()] || 'kg';
+  const vu    = VOLUME_LABELS[getVolumeUnit()] || 'l';
+  const su    = SPEED_LABELS[getSpeedUnit()]   || 'kt';
+  const ffu   = FFPH_LABELS[getVolumeUnit()]   || 'gph';
+  const distU = getSpeedUnit() === 'kmh' ? 'km' : 'NM';
+  return [
+    { label: 'Identifikace',          keys: ['type','Manufacturer','Designation','Name'] },
+    { label: 'Konfigurace',           keys: ['No. Seats','Gear Type','Fuel type'] },
+    { label: 'Rozměry (m)',           keys: ['wingspan [m]','length [m]','height [m]'] },
+    { label: `Hmotnosti (${wu})`,     keys: ['Empty Weight [kg]','MTOW [kg]','Usefull Load [kg]'] },
+    { label: `Nádrž (${vu})`,         keys: ['__fuel_cap'] },
+    { label: 'Motor',                 keys: ['Engine Manufacturer','Engine type','No. pistons','Engine power [HP]','Engine power [kW]'] },
+    { label: `Rychlosti (${su})`,     keys: ['Vcruise 75%','Vcruise 65%','Vcruise 55%','Stall Speed Vs0 (FF)','Vs1 – Stall speed (clean)','Vx – Best angle of climb speed','Vy – Best rate of climb speed','Vno – Normal operating speed','Vne – Never exceed speed'] },
+    { label: `Dolet (${distU})`,      keys: ['Range max power [NM]','Range economy cruise[NM]'] },
+    { label: `Spotřeba (${ffu}/h)`,   keys: ['FuelFlow_75_gph','FuelFlow_55_gph'] },
+    { label: 'Náklady (CZK)',         keys: ['Fixed cost 80h/y [CZK]','Variable cost 80h/y [CZK]'] },
+  ];
+}
 
 // Hezčí zkrácené popisky sloupců
 const HG_LABELS = {
@@ -1218,30 +1227,161 @@ const HG_LABELS = {
   'No. Seats': 'Sedadel', 'Gear Type': 'Podvozek', 'Fuel type': 'Palivo',
   'wingspan [m]': 'Rozpětí', 'length [m]': 'Délka', 'height [m]': 'Výška',
   'Empty Weight [kg]': 'Prázdná', 'MTOW [kg]': 'MTOW', 'Usefull Load [kg]': 'Užit. zát.',
-  'Fuel Capacity [liters]': 'l', 'Fuel Capacity [gal US]': 'US gal',
+  '__fuel_cap': 'Nádrž',
   'Engine Manufacturer': 'Výrobce', 'Engine type': 'Typ', 'No. pistons': 'Válce',
   'Engine power [HP]': 'HP', 'Engine power [kW]': 'kW',
   'Vcruise 75%': '75%', 'Vcruise 65%': '65%', 'Vcruise 55%': '55%',
-  'Stall Speed Vs0 (FF)': 'Vs0', 'Vno – Normal operating speed': 'Vno', 'Vne – Never exceed speed': 'Vne',
+  'Stall Speed Vs0 (FF)': 'Vs0', 'Vs1 – Stall speed (clean)': 'Vs1',
+  'Vx – Best angle of climb speed': 'Vx', 'Vy – Best rate of climb speed': 'Vy',
+  'Vno – Normal operating speed': 'Vno', 'Vne – Never exceed speed': 'Vne',
   'Range max power [NM]': 'Max Power', 'Range economy cruise[NM]': 'Economy',
   'FuelFlow_75_gph': '75%', 'FuelFlow_55_gph': '55%',
   'Fixed cost 80h/y [CZK]': 'Fixní', 'Variable cost 80h/y [CZK]': 'Variabilní',
 };
 
-let hgData = [];      // všechna data z API
-let hgCols = [];      // pořadí sloupců
+// Tooltip texty zobrazené po najetí myší na záhlaví sloupce
+const HG_TOOLTIPS = {
+  'type': 'Typ letadla (SEP / MEP)',
+  'Manufacturer': 'Výrobce letadla',
+  'Designation': 'Typové označení',
+  'Name': 'Obchodní název',
+  'No. Seats': 'Počet sedadel včetně pilota',
+  'Gear Type': 'Typ podvozku (pevný / zatažitelný)',
+  'Fuel type': 'Typ paliva (AVGAS 100LL / Jet-A1)',
+  'wingspan [m]': 'Rozpětí křídel [m]',
+  'length [m]': 'Délka trupu [m]',
+  'height [m]': 'Výška letadla [m]',
+  'Empty Weight [kg]': 'Prázdná hmotnost letadla',
+  'MTOW [kg]': 'Maximum Take-Off Weight – maximální vzletová hmotnost',
+  'Usefull Load [kg]': 'Užitečná zátěž = MTOW − prázdná hmotnost',
+  '__fuel_cap': 'Kapacita palivových nádrží',
+  'Engine Manufacturer': 'Výrobce motoru',
+  'Engine type': 'Typ / označení motoru',
+  'No. pistons': 'Počet válců motoru',
+  'Engine power [HP]': 'Výkon motoru v koních (HP)',
+  'Engine power [kW]': 'Výkon motoru v kilowattech (kW)',
+  'Vcruise 75%': 'Cestovní rychlost při 75% výkonu',
+  'Vcruise 65%': 'Cestovní rychlost při 65% výkonu',
+  'Vcruise 55%': 'Cestovní rychlost při 55% výkonu (economy)',
+  'Stall Speed Vs0 (FF)': 'Vs0 – Pádová rychlost s vysunutými klapkami (přistávací konfigurace)',
+  'Vs1 – Stall speed (clean)': 'Vs1 – Pádová rychlost v čisté konfiguraci (bez klapek)',
+  'Vx – Best angle of climb speed': 'Vx – Rychlost nejlepšího úhlu stoupání (největší výška na nejkratší vzdálenost)',
+  'Vy – Best rate of climb speed': 'Vy – Rychlost nejlepší rychlosti stoupání (největší výška za jednotku času)',
+  'Vno – Normal operating speed': 'Vno – Maximální rychlost v normálním provozu (plynulý vzduch)',
+  'Vne – Never exceed speed': 'Vne – Nikdy nepřekračovatelná rychlost',
+  'Range max power [NM]': 'Dolet při maximálním výkonu (75%)',
+  'Range economy cruise[NM]': 'Dolet při ekonomickém cestování (55%)',
+  'FuelFlow_75_gph': 'Spotřeba paliva při 75% výkonu',
+  'FuelFlow_55_gph': 'Spotřeba paliva při 55% výkonu (economy)',
+  'Fixed cost 80h/y [CZK]': 'Roční fixní náklady (pojištění, hangár, údržba…) přepočtené na 80 h/rok',
+  'Variable cost 80h/y [CZK]': 'Roční variabilní náklady (revize, přistání…) přepočtené na 80 h/rok',
+};
+
+// Sloupce obsahující hmotnosti v kg (ze CSV)
+const HG_WEIGHT_KEYS = new Set(['Empty Weight [kg]','MTOW [kg]','Usefull Load [kg]']);
+// Rychlosti v kt (ze CSV)
+const HG_SPEED_KT_KEYS = new Set(['Vcruise 75%','Vcruise 65%','Vcruise 55%',
+  'Stall Speed Vs0 (FF)','Vs1 – Stall speed (clean)',
+  'Vx – Best angle of climb speed','Vy – Best rate of climb speed',
+  'Vno – Normal operating speed','Vne – Never exceed speed']);
+// Dolet v NM (ze CSV)
+const HG_DIST_NM_KEYS = new Set(['Range max power [NM]','Range economy cruise[NM]']);
+// Spotřeba v gph (ze CSV)
+const HG_GPH_KEYS = new Set(['FuelFlow_75_gph','FuelFlow_55_gph']);
+
+let hgData = [];      // všechna data z API (řádky)
+let hgCols = [];      // zobrazené sloupce (po přemapování obsahuje __fuel_cap)
 let hgSortCol = null;
 let hgSortAsc = true;
 let hgFilteredData = [];
 
+/**
+ * Přemapuje sloupce z API: Fuel Capacity [liters] + Fuel Capacity [gal US]
+ * → jeden virtuální klíč __fuel_cap (hodnota = litry ze CSV).
+ * Zároveň vloží __fuel_cap na místo prvního z obou fuel sloupců.
+ */
+function remapFuelCols(cols, rows) {
+  const litKey = 'Fuel Capacity [liters]';
+  const galKey = 'Fuel Capacity [gal US]';
+  const litIdx = cols.indexOf(litKey);
+  const galIdx = cols.indexOf(galKey);
+  if (litIdx === -1 && galIdx === -1) return { cols, rows }; // CSV nemá fuel sloupce
+
+  // Nové pořadí sloupců: vložíme __fuel_cap na místo prvního z dvojice, druhý vynecháme
+  const insertAt = Math.min(...[litIdx, galIdx].filter(i => i !== -1));
+  const newCols = cols.filter(c => c !== litKey && c !== galKey);
+  newCols.splice(insertAt, 0, '__fuel_cap');
+
+  // Do každého řádku přidáme __fuel_cap = hodnota v litrech
+  const newRows = rows.map(r => {
+    const rec = { ...r };
+    // Preferujeme litry; fallback na US gal převedený na litry
+    if (rec[litKey] != null) {
+      rec['__fuel_cap'] = rec[litKey];
+    } else if (rec[galKey] != null) {
+      rec['__fuel_cap'] = rec[galKey] / L_TO_USG;
+    } else {
+      rec['__fuel_cap'] = null;
+    }
+    return rec;
+  });
+
+  return { cols: newCols, rows: newRows };
+}
+
 function hgFmt(v, key) {
   if (v === null || v === undefined) return '–';
-  if (typeof v === 'number') {
-    // Celá čísla bez desetin, floaty s max 2 des. místy
-    return Number.isInteger(v) ? v.toLocaleString('cs-CZ')
-                               : (+v.toFixed(2)).toLocaleString('cs-CZ');
+  const n = typeof v === 'number' ? v : parseFloat(v);
+  if (isNaN(n)) return String(v);
+
+  // Hmotnosti: kg → lb pokud zvoleno
+  if (HG_WEIGHT_KEYS.has(key)) {
+    const conv = getWeightUnit() === 'lb' ? n * KG_TO_LB : n;
+    return Math.round(conv).toLocaleString('cs-CZ');
   }
-  return String(v);
+
+  // Virtuální nádrž: vždy v litrech → převod na zvolenou jednotku
+  if (key === '__fuel_cap') {
+    const u = getVolumeUnit();
+    let conv = n;
+    if (u === 'usg') conv = n * L_TO_USG;
+    else if (u === 'img') conv = n * L_TO_IMG;
+    return (+conv.toFixed(1)).toLocaleString('cs-CZ');
+  }
+
+  // Rychlosti v kt
+  if (HG_SPEED_KT_KEYS.has(key)) {
+    const conv = getSpeedUnit() === 'kmh' ? n * KT_TO_KMH : n;
+    return Math.round(conv).toLocaleString('cs-CZ');
+  }
+
+  // Dolet v NM
+  if (HG_DIST_NM_KEYS.has(key)) {
+    const conv = getSpeedUnit() === 'kmh' ? n * KT_TO_KMH : n;
+    return Math.round(conv).toLocaleString('cs-CZ');
+  }
+
+  // Spotřeba v gph → převod na zvolený objem/h
+  if (HG_GPH_KEYS.has(key)) {
+    const lph = n * GPH_TO_LPH;
+    const u = getVolumeUnit();
+    let conv = lph;
+    if (u === 'usg') conv = lph * L_TO_USG;
+    else if (u === 'img') conv = lph * L_TO_IMG;
+    return (+conv.toFixed(1)).toLocaleString('cs-CZ');
+  }
+
+  // Ostatní čísla
+  return Number.isInteger(n) ? n.toLocaleString('cs-CZ')
+                              : (+n.toFixed(2)).toLocaleString('cs-CZ');
+}
+
+/** Překreslí záhlaví hangár tabulky (skupiny + sloupce) při změně jednotek. */
+function refreshHangarHeaders() {
+  if (!hgCols.length) return;
+  const thead = document.getElementById('hangar-thead');
+  thead.innerHTML = '';
+  renderHangarTable();
 }
 
 function renderHangarTable() {
@@ -1262,10 +1402,10 @@ function renderHangarTable() {
     });
   }
 
-  // Sestavíme set klíčů prvního sloupce každé skupiny (pro oddělovač)
+  const HG_GROUPS = getHgGroups();
   const sepKeys = new Set(HG_GROUPS.map(g => g.keys[0]));
 
-  // Záhlaví – pouze pokud ještě není
+  // Záhlaví – sestavíme vždy pokud thead prázdný (refreshHangarHeaders ho vyprázdní)
   const thead = document.getElementById('hangar-thead');
   if (!thead.hasChildNodes()) {
     // Řádek skupin
@@ -1287,15 +1427,17 @@ function renderHangarTable() {
     hgCols.forEach(key => {
       const th = document.createElement('th');
       th.textContent = HG_LABELS[key] || key;
-      th.title = key;
+      th.dataset.key = key;
+      th.title = HG_TOOLTIPS[key] || (HG_LABELS[key] || key);
       if (sepKeys.has(key)) th.style.borderLeft = '2px solid #3a4fab';
       th.addEventListener('click', () => {
         if (hgSortCol === key) { hgSortAsc = !hgSortAsc; }
         else { hgSortCol = key; hgSortAsc = true; }
-        // Aktualizuj šipky
         colRow.querySelectorAll('th').forEach(t => {
-          t.textContent = (HG_LABELS[t.title] || t.title) +
-            (t.title === hgSortCol ? (hgSortAsc ? ' ▲' : ' ▼') : '');
+          const k = t.dataset.key;
+          t.textContent = (HG_LABELS[k] || k) +
+            (k === hgSortCol ? (hgSortAsc ? ' ▲' : ' ▼') : '');
+          t.title = HG_TOOLTIPS[k] || (HG_LABELS[k] || k);
         });
         renderHangarTable();
       });
@@ -1303,7 +1445,6 @@ function renderHangarTable() {
     });
     thead.appendChild(colRow);
 
-    // Sticky: col řádek musí být pod group řádkem
     requestAnimationFrame(() => {
       const groupH = thead.querySelector('tr.hg-group')?.getBoundingClientRect().height || 0;
       thead.querySelectorAll('tr:not(.hg-group) th').forEach(th => {
@@ -1336,8 +1477,10 @@ async function loadHangar() {
     const resp = await fetch('/api/hangar');
     const data = await resp.json();
     if (!data.ok) throw new Error(data.error);
-    hgData = data.rows;
-    hgCols = data.columns;
+    // Přemapujeme dva fuel sloupce na jeden virtuální __fuel_cap
+    const mapped = remapFuelCols(data.columns, data.rows);
+    hgData = mapped.rows;
+    hgCols = mapped.cols;
     renderHangarTable();
   } catch(e) {
     document.getElementById('hangar-status').textContent = '⚠ Chyba: ' + e;

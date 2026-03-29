@@ -407,7 +407,9 @@ def api_hangar():
             'Engine power [HP]', 'Engine power [kW]',
             # Rychlosti (kt)
             'Vcruise 75%', 'Vcruise 65%', 'Vcruise 55%',
-            'Stall Speed Vs0 (FF)', 'Vno – Normal operating speed', 'Vne – Never exceed speed',
+            'Stall Speed Vs0 (FF)', 'Vs1 – Stall speed (clean)',
+            'Vx – Best angle of climb speed', 'Vy – Best rate of climb speed',
+            'Vno – Normal operating speed', 'Vne – Never exceed speed',
             # Dolet
             'Range max power [NM]', 'Range economy cruise[NM]',
             # Spotřeba (gph)
