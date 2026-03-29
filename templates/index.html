@@ -925,13 +925,16 @@ function getColVal(plane, col) {
   const cmp = _cmpProfile(mp, ec);
   const cp  = cmp.p;
   // Studie: výpočet z compare profilu
-  const dist     = getDistForCalc();               // v zvolené jednotce (NM nebo km)
-  const noSeats  = plane.no_seats  || 0;
-  const occSeats = plane._occupied_seats || 0;
-  const cmpTotal = cp.total_cost ?? null;
-  const cpDis    = (cmpTotal != null && dist > 0)       ? cmpTotal / dist    : null;
-  const cpSeat   = (cmpTotal != null && noSeats > 0)    ? cmpTotal / noSeats : null;
-  const cpOSeat  = (cmpTotal != null && occSeats > 0)   ? cmpTotal / occSeats : null;
+  const dist          = getDistForCalc();               // v zvolené jednotce (NM nebo km)
+  const noSeats       = plane.no_seats  || 0;
+  const occSeats      = plane._occupied_seats || 0;
+  const cmpTotal      = cp.total_cost ?? null;
+  // CpOSeat: dělíme min(kapacita letadla, počet cestujících) –
+  // pokud letadlo má méně míst, počítáme jakoby letělo plné (musela by letět 2 letadla)
+  const effectiveSeats = occSeats > 0 ? Math.min(noSeats, occSeats) : 0;
+  const cpDis    = (cmpTotal != null && dist > 0)            ? cmpTotal / dist           : null;
+  const cpSeat   = (cmpTotal != null && noSeats > 0)         ? cmpTotal / noSeats        : null;
+  const cpOSeat  = (cmpTotal != null && effectiveSeats > 0)  ? cmpTotal / effectiveSeats : null;
   const m = {
     type: plane.type, manufacturer: plane.manufacturer,
     designation: plane.designation, name: plane.name,
@@ -1068,13 +1071,15 @@ function renderTable(planes, currencySymbol) {
     const cmpWarn = cp.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${cp.needed_fuel_l} l">⚠</span>` : '';
 
     // Studie
-    const dist     = getDistForCalc();
-    const noSeats  = p.no_seats || 0;
-    const occSeats = p._occupied_seats || 0;
-    const cmpTotal = cp.total_cost ?? null;
-    const cpDis    = (cmpTotal != null && dist > 0)      ? cmpTotal / dist     : null;
-    const cpSeat   = (cmpTotal != null && noSeats > 0)   ? cmpTotal / noSeats  : null;
-    const cpOSeat  = (cmpTotal != null && occSeats > 0)  ? cmpTotal / occSeats : null;
+    const dist           = getDistForCalc();
+    const noSeats        = p.no_seats || 0;
+    const occSeats       = p._occupied_seats || 0;
+    const cmpTotal       = cp.total_cost ?? null;
+    // CpOSeat: dělíme min(kapacita letadla, počet cestujících)
+    const effectiveSeats = occSeats > 0 ? Math.min(noSeats, occSeats) : 0;
+    const cpDis    = (cmpTotal != null && dist > 0)            ? cmpTotal / dist           : null;
+    const cpSeat   = (cmpTotal != null && noSeats > 0)         ? cmpTotal / noSeats        : null;
+    const cpOSeat  = (cmpTotal != null && effectiveSeats > 0)  ? cmpTotal / effectiveSeats : null;
 
     const modeBadge = `<span class="cmp-badge ${cmp.mode.toLowerCase()}">${cmp.mode}</span>`;
 
