@@ -253,12 +253,15 @@
     body.view-economy   .col-mp { display: none; }
     body.view-economy   .col-hr { display: none; }
     body.view-economy   .col-cmp { display: none; }
+    body.view-economy   .col-study { display: none; }
     body.view-maxpower  .col-ec { display: none; }
     body.view-maxpower  .col-hr { display: none; }
     body.view-maxpower  .col-cmp { display: none; }
+    body.view-maxpower  .col-study { display: none; }
     body.view-hourrates .col-mp { display: none; }
     body.view-hourrates .col-ec { display: none; }
     body.view-hourrates .col-cmp { display: none; }
+    body.view-hourrates .col-study { display: none; }
     body.view-compare   .col-mp { display: none; }
     body.view-compare   .col-ec { display: none; }
     body.view-compare   .col-hr { display: none; }
@@ -444,6 +447,15 @@
             <label for="su-kt">kt</label>
             <input type="radio" name="speed_unit" id="su-kmh" value="kmh"/>
             <label for="su-kmh">km/h</label>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="rate-prefix">Vzdálenost:</span>
+          <div class="font-slider" id="dist-unit-slider">
+            <input type="radio" name="dist_unit" id="du-nm"  value="nm"  checked/>
+            <label for="du-nm">NM</label>
+            <input type="radio" name="dist_unit" id="du-km"  value="km"/>
+            <label for="du-km">km</label>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
@@ -643,6 +655,7 @@
             <th colspan="11" class="col-mp">⚡ Max Power (75 %)</th>
             <th colspan="11" class="col-ec">🍃 Economy Cruise (55 %)</th>
             <th colspan="12" class="col-cmp">⚖ Compare (nejlevnější profil)</th>
+            <th colspan="3"  class="col-study">📊 Studie</th>
             <th colspan="9" class="col-hr">🕐 Hour Rates</th>
           </tr>
           <tr id="col-headers">
@@ -696,6 +709,10 @@
             <th data-col="cmp_time"         class="col-cmp">Doba letu<span class="sort-arrow"></span></th>
             <th data-col="cmp_stops"        class="col-cmp">Mezipřistání<span class="sort-arrow"></span></th>
             <th data-col="cmp_total_time"   class="col-cmp">Celk. doba cesty<span class="sort-arrow"></span></th>
+            <!-- studie -->
+            <th data-col="study_cp_dis"  class="col-study col-cost-header">CpDis (<span class="cost-sym">Kč</span>/<span class="dist-unit">NM</span>)<span class="sort-arrow"></span></th>
+            <th data-col="study_cp_seat" class="col-study col-cost-header">CpSeat (<span class="cost-sym">Kč</span>/sedadlo)<span class="sort-arrow"></span></th>
+            <th data-col="study_cp_oseat" class="col-study col-cost-header">CpOSeat (<span class="cost-sym">Kč</span>/obs.)<span class="sort-arrow"></span></th>
             <!-- hour rates -->
             <th data-col="hr_mp_ff_lph"       class="col-hr">Spotr. MP (<span class="ffph-unit">l</span>/h)<span class="sort-arrow"></span></th>
             <th data-col="hr_mp_fuel_cost_ph"  class="col-cost-header col-hr">Palivo MP (<span class="cost-sym">Kč</span>/h)<span class="sort-arrow"></span></th>
@@ -905,8 +922,16 @@ function getColVal(plane, col) {
   const mp = plane.max_power   || {};
   const ec = plane.econ_cruise || {};
   const hr = plane.hour_rates  || {};
-  // Compare: zvolíme profil s nižší celkovou cenou
   const cmp = _cmpProfile(mp, ec);
+  const cp  = cmp.p;
+  // Studie: výpočet z compare profilu
+  const dist     = getDistForCalc();               // v zvolené jednotce (NM nebo km)
+  const noSeats  = plane.no_seats  || 0;
+  const occSeats = plane._occupied_seats || 0;
+  const cmpTotal = cp.total_cost ?? null;
+  const cpDis    = (cmpTotal != null && dist > 0)       ? cmpTotal / dist    : null;
+  const cpSeat   = (cmpTotal != null && noSeats > 0)    ? cmpTotal / noSeats : null;
+  const cpOSeat  = (cmpTotal != null && occSeats > 0)   ? cmpTotal / occSeats : null;
   const m = {
     type: plane.type, manufacturer: plane.manufacturer,
     designation: plane.designation, name: plane.name,
@@ -933,13 +958,16 @@ function getColVal(plane, col) {
     hr_plane_cost_ph: hr.plane_cost_ph,
     hr_mp_total_ph: hr.mp_total_ph, hr_ec_total_ph: hr.ec_total_ph,
     cmp_mode: cmp.mode,
-    cmp_v_kt: cmp.p.v_kt, cmp_ff_lph: cmp.p.ff_lph,
-    cmp_fob_l: cmp.p.fob_l, cmp_trip_fuel_l: cmp.p.trip_fuel_l,
-    cmp_fuel_cost: cmp.p.fuel_cost, cmp_plane_cost: cmp.p.plane_cost,
-    cmp_total: cmp.p.total_cost,
-    cmp_time: cmp.p.flight_time_h, cmp_stops: cmp.p.stops,
-    cmp_total_time: cmp.p.total_time_h,
-    cmp_load_reserve: cmp.p.load_reserve_kg,
+    cmp_v_kt: cp.v_kt, cmp_ff_lph: cp.ff_lph,
+    cmp_fob_l: cp.fob_l, cmp_trip_fuel_l: cp.trip_fuel_l,
+    cmp_fuel_cost: cp.fuel_cost, cmp_plane_cost: cp.plane_cost,
+    cmp_total: cp.total_cost,
+    cmp_time: cp.flight_time_h, cmp_stops: cp.stops,
+    cmp_total_time: cp.total_time_h,
+    cmp_load_reserve: cp.load_reserve_kg,
+    study_cp_dis:   cpDis,
+    study_cp_seat:  cpSeat,
+    study_cp_oseat: cpOSeat,
   };
   return m[col] ?? null;
 }
@@ -961,6 +989,12 @@ let currentCurrencySymbol = 'Kč';
 function fmtMoney(v) {
   if (v == null || isNaN(v)) return '–';
   const decimals = (currentCurrencySymbol === 'Kč') ? 0 : 2;
+  return Number(v).toLocaleString('cs-CZ', {minimumFractionDigits: decimals, maximumFractionDigits: decimals}) + '\u00a0' + currentCurrencySymbol;
+}
+
+function fmtStudy(v) {
+  if (v == null || isNaN(v)) return '–';
+  const decimals = (currentCurrencySymbol === 'Kč') ? 1 : 2;
   return Number(v).toLocaleString('cs-CZ', {minimumFractionDigits: decimals, maximumFractionDigits: decimals}) + '\u00a0' + currentCurrencySymbol;
 }
 
@@ -1033,6 +1067,15 @@ function renderTable(planes, currencySymbol) {
     const ecWarn  = ec.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${ec.needed_fuel_l} l">⚠</span>` : '';
     const cmpWarn = cp.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${cp.needed_fuel_l} l">⚠</span>` : '';
 
+    // Studie
+    const dist     = getDistForCalc();
+    const noSeats  = p.no_seats || 0;
+    const occSeats = p._occupied_seats || 0;
+    const cmpTotal = cp.total_cost ?? null;
+    const cpDis    = (cmpTotal != null && dist > 0)      ? cmpTotal / dist     : null;
+    const cpSeat   = (cmpTotal != null && noSeats > 0)   ? cmpTotal / noSeats  : null;
+    const cpOSeat  = (cmpTotal != null && occSeats > 0)  ? cmpTotal / occSeats : null;
+
     const modeBadge = `<span class="cmp-badge ${cmp.mode.toLowerCase()}">${cmp.mode}</span>`;
 
     return `<tr class="${suitable_cls}${best_cls}">
@@ -1081,6 +1124,9 @@ function renderTable(planes, currencySymbol) {
       <td style="text-align:center" class="col-cmp${cmpFail}">${cp.flight_time_fmt || '–'}</td>
       <td style="text-align:center" class="col-cmp${cmpFail} ${cp.stops > 0 ? 'stops-some' : 'stops-none'}">${cp.stops != null ? cp.stops : '–'}</td>
       <td style="text-align:center" class="col-cmp${cmpFail}">${cp.total_time_fmt || '–'}</td>
+      <td style="text-align:right" class="col-study">${fmtStudy(cpDis)}</td>
+      <td style="text-align:right" class="col-study">${fmtStudy(cpSeat)}</td>
+      <td style="text-align:right" class="col-study">${fmtStudy(cpOSeat)}</td>
       <td style="text-align:right" class="col-hr">${fmtFfph(hr.mp_ff_lph)}</td>
       <td style="text-align:right" class="col-hr">${fmtMoney(hr.mp_fuel_cost_ph)}</td>
       <td style="text-align:right" class="col-hr">${fmtFfph(hr.ec_ff_lph)}</td>
@@ -1149,6 +1195,20 @@ function getSpeedUnit() {
   const c = document.querySelector('input[name="speed_unit"]:checked');
   return c ? c.value : 'kt';
 }
+function getDistUnit() {
+  const c = document.querySelector('input[name="dist_unit"]:checked');
+  return c ? c.value : 'nm';
+}
+/** Vrátí vzdálenost z inputu v km (pro výpočet CpDis). */
+function getDistKm() {
+  const nm = parseFloat(document.getElementById('distance_nm')?.value) || 0;
+  return nm * 1.852;
+}
+/** Vzdálenost v zvolené jednotce (pro zobrazení v záhlaví). */
+function getDistForCalc() {
+  const nm = parseFloat(document.getElementById('distance_nm')?.value) || 0;
+  return getDistUnit() === 'km' ? nm * 1.852 : nm;
+}
 
 function convertWt(kg) {
   if (kg == null || isNaN(kg)) return null;
@@ -1189,10 +1249,12 @@ function updateUnitHeaders() {
   const vu   = VOLUME_LABELS[getVolumeUnit()] || 'l';
   const su   = SPEED_LABELS[getSpeedUnit()]   || 'kt';
   const ffpu = FFPH_LABELS[getVolumeUnit()]   || 'l';
-  document.querySelectorAll('.wt-unit').forEach(el  => { el.textContent = wu; });
-  document.querySelectorAll('.vol-unit').forEach(el => { el.textContent = vu; });
-  document.querySelectorAll('.spd-unit').forEach(el => { el.textContent = su; });
-  document.querySelectorAll('.ffph-unit').forEach(el=> { el.textContent = ffpu; });
+  const du   = getDistUnit() === 'km' ? 'km' : 'NM';
+  document.querySelectorAll('.wt-unit').forEach(el   => { el.textContent = wu; });
+  document.querySelectorAll('.vol-unit').forEach(el  => { el.textContent = vu; });
+  document.querySelectorAll('.spd-unit').forEach(el  => { el.textContent = su; });
+  document.querySelectorAll('.ffph-unit').forEach(el => { el.textContent = ffpu; });
+  document.querySelectorAll('.dist-unit').forEach(el => { el.textContent = du; });
 }
 
 document.querySelectorAll('input[name="weight_unit"], input[name="volume_unit"]')
@@ -1200,11 +1262,17 @@ document.querySelectorAll('input[name="weight_unit"], input[name="volume_unit"]'
     updateUnitHeaders();
     if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
     refreshHangarHeaders();
-  }));document.querySelectorAll('input[name="speed_unit"]')
+  }));
+document.querySelectorAll('input[name="speed_unit"]')
   .forEach(r => r.addEventListener('change', () => {
     updateUnitHeaders();
     if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
     refreshHangarHeaders();
+  }));
+document.querySelectorAll('input[name="dist_unit"]')
+  .forEach(r => r.addEventListener('change', () => {
+    updateUnitHeaders();
+    if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
   }));
 updateUnitHeaders();
 
@@ -1285,6 +1353,10 @@ async function doCompute() {
     });
     const data = await resp.json();
     if (data.ok) {
+      // Přidáme occupied_seats do každého letadla pro výpočet CpOSeat
+      if (data.occupied_seats != null) {
+        data.planes.forEach(p => { p._occupied_seats = data.occupied_seats; });
+      }
       renderTable(data.planes, data.currency_symbol);
       // Potvrzení payload badge hodnotou ověřenou serverem
       const payloadEl    = document.getElementById('payload-display');
