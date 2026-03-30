@@ -105,8 +105,9 @@ def compute(params: dict) -> list:
     LB_TO_KG = 0.453592
 
     # --- plán ---
-    distance_nm = float(params.get('distance_nm', 200))
-    wind_kt     = float(params.get('wind_kt',     0))
+    distance_nm          = float(params.get('distance_nm',          200))
+    wind_kt              = float(params.get('wind_kt',              0))
+    cruise_altitude_ft   = float(params.get('cruise_altitude_ft',   8000))
 
     # --- obsazení ---
     pax_weights   = []
@@ -339,11 +340,12 @@ def compute(params: dict) -> list:
                 if (out['ec_fuel_cost_ph'] is not None and plane_cost_ph_native is not None) else None
             return out
 
-        r['hour_rates']      = calc_hour_rates(ff75_gph, ff55_gph, cost_ph, fuel_price, density, fx_rate)
-        r['currency']        = currency
-        r['currency_symbol'] = CURRENCY_SYMBOLS[currency]
-        r['weight_unit']     = weight_unit
-        r['volume_unit']     = volume_unit
+        r['hour_rates']         = calc_hour_rates(ff75_gph, ff55_gph, cost_ph, fuel_price, density, fx_rate)
+        r['currency']           = currency
+        r['currency_symbol']    = CURRENCY_SYMBOLS[currency]
+        r['weight_unit']        = weight_unit
+        r['volume_unit']        = volume_unit
+        r['cruise_altitude_ft'] = int(cruise_altitude_ft)
 
         results.append(r)
 

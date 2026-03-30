@@ -516,6 +516,10 @@
           <input type="number" id="wind_kt" value="0" step="5"/>
         </div>
         <div class="field">
+          <label>Cruise Altitude (ft)</label>
+          <input type="number" id="cruise_altitude_ft" value="8000" step="500" min="0" max="25000"/>
+        </div>
+        <div class="field">
           <label>Alternativa (NM) – jen info</label>
           <input type="number" id="alternate_nm" value="0" step="5" min="0"/>
         </div>
@@ -1329,7 +1333,7 @@ function collectParams() {
   const numIds = [
     'avgas_price','jet_a1_price','avgas_density','jet_a1_density',
     'fuel_reserve_min','person_weight_kg','baggage_per_seat_kg','annual_hours',
-    'distance_nm','wind_kt',
+    'distance_nm','wind_kt','cruise_altitude_ft',
     'eur_to_czk','usd_to_czk','gbp_to_czk',
     'pax1_weight','pax1_baggage','pax2_weight','pax2_baggage',
     'pax3_weight','pax3_baggage','pax4_weight','pax4_baggage',
