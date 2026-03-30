@@ -13,6 +13,7 @@
 
     /* ── Layout: top / bottom ────────────────────── */
     #app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    body.profile-active #app { overflow: auto; height: auto; min-height: 100vh; }
     #top-panel {
       flex: 0 0 auto;
       background: #23272f;
@@ -20,6 +21,7 @@
       padding: 10px 14px 0;
       min-height: 220px;
     }
+    body.profile-active #top-panel { min-height: 0; overflow: visible; }
     body.hangar-active #top-panel { min-height: 0; }
     #bottom-panel {
       flex: 1 1 0;
@@ -29,14 +31,46 @@
       min-height: 0;
     }
 
+    /* ── Units bar – řádek jednotek nad taby ────────── */
+    #units-bar {
+      display: flex; align-items: center; gap: 18px; flex-wrap: nowrap;
+      background: #1e2230; border-bottom: 1px solid #2e3448;
+      padding: 5px 14px;
+      font-size: .88em;
+    }
+    #units-bar .ub-group {
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    #units-bar .ub-label {
+      color: #6a7a95; font-size: .9em; white-space: nowrap; user-select: none;
+    }
+    #units-bar .font-slider label {
+      padding: 2px 9px; font-size: .88em;
+    }
+
     /* ── Tab navigation ──────────────────────────── */
-    .tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 8px; align-items: flex-end; }
     .tab-btn {
       padding: 6px 20px; border: none; border-radius: 6px 6px 0 0; cursor: pointer;
       background: #2e3340; color: #8a9ab5; font-size: 1em; transition: background .15s;
     }
     .tab-btn.active { background: #3a4fab; color: #fff; }
     .tab-btn:hover:not(.active) { background: #363d50; }
+    /* Oddělovač mezerou mezi tab skupinami */
+    .tab-sep { width: 12px; flex-shrink: 0; }
+    /* Ozubené kolečko – napravo */
+    .tab-spacer { flex: 1; }
+    #btn-gear {
+      padding: 0; width: 36px; height: 36px;
+      border: none; border-radius: 6px 6px 0 0; cursor: pointer;
+      background: #2e3340; color: #8a9ab5;
+      font-size: 1.4em; line-height: 1;
+      transition: background .15s, color .15s;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    #btn-gear.active { background: #3a4fab; color: #fff; }
+    #btn-gear:hover:not(.active) { background: #363d50; color: #d4d8e0; }
 
     /* ── Tab content ─────────────────────────────── */
     .tab-pane { display: none; }
@@ -354,180 +388,275 @@
     #hangar-table tbody td:last-child { border-right: none; }
     .hg-sep { border-left: 2px solid #3a4fab !important; }
     #tab-hangar { padding-bottom: 6px; }
+
+    /* ── Flight Summary ─────────────────────────────────────────────────── */
+    .flight-summary {
+      margin-bottom: 14px;
+    }
+    .fs-section-title {
+      font-size: .78em; font-weight: 700; color: #3a4fab;
+      text-transform: uppercase; letter-spacing: .07em;
+      margin: 10px 0 6px; padding-bottom: 4px;
+      border-bottom: 1px solid #2e3448;
+    }
+    .fs-section-title.mp { color: #4db8e8; }
+    .fs-section-title.ec { color: #6fd96f; }
+    .fs-row {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;
+    }
+    .flight-details-title {
+      font-size: .82em; font-weight: 700; color: #8a9ab5;
+      text-transform: uppercase; letter-spacing: .07em;
+      margin: 16px 0 8px; padding-bottom: 5px;
+      border-bottom: 2px solid #3a4050;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── Karta Profil letu ──────────────────────────────────────────────── */
+    #tab-profile { padding: 8px 4px 14px; }
+
+    /* Řádek přehledu (TOW / MTOW, Load reserve, FOB…) */
+    .profile-summary {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+    }
+    .psm-card {
+      background: #1a1d23; border: 1px solid #3a4050; border-radius: 6px;
+      padding: 6px 14px; min-width: 110px;
+    }
+    .psm-card .psm-label { font-size: .75em; color: #5a7090; text-transform: uppercase; letter-spacing: .05em; }
+    .psm-card .psm-value { font-size: 1.1em; font-weight: 700; color: #d4d8e0; margin-top: 1px; }
+    .psm-card .psm-value.warn  { color: #d4a830; }
+    .psm-card .psm-value.ok    { color: #6fd96f; }
+    .psm-card .psm-value.err   { color: #d06060; }
+
+    /* Sloučené karty se svislou čarou */
+    .psm-combo {
+      background: #1a1d23; border: 1px solid #3a4050; border-radius: 6px;
+      display: flex; align-items: stretch; overflow: hidden;
+    }
+    .psm-combo-cell {
+      padding: 6px 14px; min-width: 100px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .psm-combo-cell + .psm-combo-cell {
+      border-left: 1px solid #3a4050;
+    }
+    .psm-combo-cell .psm-label { font-size: .75em; color: #5a7090; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+    .psm-combo-cell .psm-value { font-size: 1.05em; font-weight: 700; color: #d4d8e0; white-space: nowrap; }
+    .psm-combo-cell .psm-value.warn  { color: #d4a830; }
+    .psm-combo-cell .psm-value.ok    { color: #6fd96f; }
+    .psm-combo-cell .psm-value.err   { color: #d06060; }
+
+    /* ── Info-toggle tlačítko pro schovávací tabulky ────────────────────── */
+    .info-toggle-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1.5px solid #3a6080; background: #1a2a3a;
+      color: #4db8e8; font-size: .82em; font-weight: 700;
+      cursor: pointer; user-select: none; flex-shrink: 0;
+      transition: background .15s, border-color .15s, color .15s;
+      line-height: 1;
+    }
+    .info-toggle-btn:hover  { background: #1e3a50; border-color: #4db8e8; }
+    .info-toggle-btn.active { background: #1e3a50; border-color: #4db8e8; color: #7dd4f8; }
+
+    /* Detail tabulka – skrytá/viditelná */
+    .phase-detail-table {
+      display: none; margin-top: 12px;
+    }
+    .phase-detail-table.visible { display: block; }
+
+    /* Řádek summary + info tlačítko */
+    .phase-summary-row {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 0;
+    }
+
+    /* Cruise dual panel */
+    .cruise-dual {
+      display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 4px;
+    }
+    .cruise-panel {
+      background: #1e2230; border: 1px solid #3a4050; border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .cruise-panel-title {
+      font-size: .8em; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #3a4050;
+    }
+    .cruise-panel-title.mp { color: #4db8e8; }
+    .cruise-panel-title.ec { color: #6fd96f; }
+    .cruise-cards { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* Výběr letadla */
+    #profile-plane-select {
+      background: #1a1d23; border: 1px solid #3a4050; border-radius: 4px;
+      color: #d4d8e0; padding: 5px 10px; font-size: 1em;
+      transition: border-color .15s; cursor: pointer; min-width: 280px;
+    }
+    #profile-plane-select:focus { outline: none; border-color: #3a4fab; }
+    #profile-plane-select optgroup {
+      color: #4db8e8; font-weight: 700; font-style: normal;
+      background: #1a1d23;
+    }
+    #profile-plane-select option {
+      color: #d4d8e0; background: #1a1d23;
+      padding-left: 12px;
+    }
+
+    /* Pruhy fází letu */
+    .flight-phases {
+      display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
+    }
+    .phase-block {
+      border: 1px solid #3a4050; border-radius: 6px;
+      overflow: hidden;
+    }
+    .phase-header {
+      display: flex; align-items: center; gap: 10px;
+      background: #23272f; padding: 7px 14px; cursor: pointer;
+      user-select: none;
+    }
+    .phase-header:hover { background: #272d3a; }
+    .phase-icon { font-size: 1.2em; }
+    .phase-title { font-weight: 700; font-size: .95em; color: #a0b4d0; flex: 1; }
+    .phase-badge {
+      font-size: .8em; padding: 2px 8px; border-radius: 10px;
+      background: #1e2230; color: #5a7090; border: 1px solid #3a4050;
+    }
+    .phase-badge.active { background: #1a2a3a; color: #4db8e8; border-color: #2a4a6a; }
+    .phase-chevron { color: #5a7090; font-size: .9em; transition: transform .2s; }
+    .phase-block.open .phase-chevron { transform: rotate(90deg); }
+
+    .phase-body {
+      display: none; padding: 10px 14px 12px;
+      background: #1a1d23;
+    }
+    .phase-block.open .phase-body { display: block; }
+
+    .phase-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px 16px;
+    }
+    .phase-grid .field label { font-size: .8em; }
+
+    /* Tabulka profilu stoupání / klesání */
+    .phase-table {
+      width: 100%; border-collapse: separate; border-spacing: 0;
+      font-size: .88em; margin-top: 8px;
+    }
+    .phase-table th {
+      background: #23272f; color: #8a9ab5; font-weight: 600;
+      padding: 4px 10px; border-bottom: 2px solid #3a4050;
+      border-right: 1px solid #2a2e3a; text-align: center;
+    }
+    .phase-table th:last-child { border-right: none; }
+    .phase-table td {
+      padding: 4px 10px; border-bottom: 1px solid #2a2e3a;
+      border-right: 1px solid #2a2e3a; text-align: center; color: #c0c8d8;
+    }
+    .phase-table td:last-child { border-right: none; }
+    .phase-table tr:last-child td { border-bottom: none; }
+    .phase-table td.highlight { color: #4db8e8; font-weight: 600; }
+
+    /* TOC / TOD badges */
+    .toc-badge, .tod-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 6px; font-size: .88em; font-weight: 600;
+    }
+    .toc-badge { background: #1a2a1a; color: #6fd96f; border: 1px solid #2a5a2a; }
+    .tod-badge { background: #1a2a3a; color: #4db8e8; border: 1px solid #2a4a6a; }
+
+    /* Airport info box */
+    .airport-box {
+      background: #1e2230; border: 1px solid #3a4050; border-radius: 6px;
+      padding: 8px 14px; display: flex; flex-wrap: wrap; gap: 12px 24px;
+    }
+    .airport-box .ap-field { display: flex; flex-direction: column; gap: 2px; min-width: 120px; }
+    .airport-box .ap-label { font-size: .75em; color: #5a7090; text-transform: uppercase; }
+    .airport-box .ap-value { font-size: .95em; color: #c0c8d8; }
+    .airport-box input.ap-input {
+      background: #1a1d23; border: 1px solid #3a4050; border-radius: 4px;
+      color: #d4d8e0; padding: 3px 6px; font-size: .92em; width: 100%;
+    }
+    .airport-box input.ap-input:focus { outline: none; border-color: #3a4fab; }
+    select.ap-input {
+      background: #1a1d23; border: 1px solid #3a4050; border-radius: 4px;
+      color: #d4d8e0; padding: 3px 6px; font-size: .92em; cursor: pointer;
+    }
   </style>
 </head>
 <body>
 <div id="app">
 
+  <!-- ═══ UNITS BAR ═══════════════════════════════════════════════════════ -->
+  <div id="units-bar">
+    <div class="ub-group">
+      <span class="ub-label">Váha:</span>
+      <div class="font-slider">
+        <input type="radio" name="weight_unit" id="wu-kg" value="kg" checked/>
+        <label for="wu-kg">kg</label>
+        <input type="radio" name="weight_unit" id="wu-lb" value="lb"/>
+        <label for="wu-lb">lb</label>
+      </div>
+    </div>
+    <div class="ub-group">
+      <span class="ub-label">Objem:</span>
+      <div class="font-slider">
+        <input type="radio" name="volume_unit" id="vu-l"   value="l"   checked/>
+        <label for="vu-l">l</label>
+        <input type="radio" name="volume_unit" id="vu-usg" value="usg"/>
+        <label for="vu-usg">US gal</label>
+        <input type="radio" name="volume_unit" id="vu-img" value="img"/>
+        <label for="vu-img">Imp gal</label>
+      </div>
+    </div>
+    <div class="ub-group">
+      <span class="ub-label">Rychlost:</span>
+      <div class="font-slider">
+        <input type="radio" name="speed_unit" id="su-kt"  value="kt"  checked/>
+        <label for="su-kt">kt</label>
+        <input type="radio" name="speed_unit" id="su-kmh" value="kmh"/>
+        <label for="su-kmh">km/h</label>
+      </div>
+    </div>
+    <div class="ub-group">
+      <span class="ub-label">Vzdálenost:</span>
+      <div class="font-slider">
+        <input type="radio" name="dist_unit" id="du-nm"  value="nm"  checked/>
+        <label for="du-nm">NM</label>
+        <input type="radio" name="dist_unit" id="du-km"  value="km"/>
+        <label for="du-km">km</label>
+      </div>
+    </div>
+    <div class="ub-group">
+      <span class="ub-label">Měna:</span>
+      <div class="font-slider">
+        <input type="radio" name="currency" id="cur-czk" value="CZK" checked/>
+        <label for="cur-czk">CZK</label>
+        <input type="radio" name="currency" id="cur-eur" value="EUR"/>
+        <label for="cur-eur">EUR</label>
+        <input type="radio" name="currency" id="cur-usd" value="USD"/>
+        <label for="cur-usd">USD</label>
+        <input type="radio" name="currency" id="cur-gbp" value="GBP"/>
+        <label for="cur-gbp">GBP</label>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ TOP PANEL ═══════════════════════════════════════════════════════ -->
   <div id="top-panel">
     <div class="tabs">
-      <button class="tab-btn active" data-tab="general">⚙ Obecné</button>
+      <button class="tab-btn active" data-tab="crew">&#128101; Pos&#225;dka</button>
       <button class="tab-btn"        data-tab="plan">🗺 Plán</button>
-      <button class="tab-btn"        data-tab="crew">👥 Obsazení</button>
+      <div class="tab-sep"></div>
+      <button class="tab-btn"        data-tab="profile">✈ Profil letu</button>
+      <div class="tab-sep"></div>
       <button class="tab-btn"        data-tab="hangar">🛩 Hangár</button>
+      <div class="tab-spacer"></div>
+      <button id="btn-gear" data-tab="general" title="Nastavení">⚙</button>
     </div>
 
-    <!-- KARTA: Obecné -->
-    <div class="tab-pane active" id="tab-general">
-      <div class="form-grid">
-        <div class="field">
-          <label>Cena AVGAS (CZK/l)</label>
-          <input type="number" id="avgas_price" value="75" step="0.5" min="0"/>
-        </div>
-        <div class="field">
-          <label>Cena JET A-1 (CZK/l)</label>
-          <input type="number" id="jet_a1_price" value="45" step="0.5" min="0"/>
-        </div>
-        <div class="field">
-          <label>Hustota AVGAS (kg/l)</label>
-          <input type="number" id="avgas_density" value="0.72" step="0.01" min="0.5" max="1"/>
-        </div>
-        <div class="field">
-          <label>Hustota JET A-1 (kg/l)</label>
-          <input type="number" id="jet_a1_density" value="0.81" step="0.01" min="0.5" max="1"/>
-        </div>
-        <div class="field">
-          <label>Palivová rezerva (min)</label>
-          <input type="number" id="fuel_reserve_min" value="30" step="5" min="0"/>
-        </div>
-        <div class="field">
-          <label>Prům. váha osoby (kg)</label>
-          <input type="number" id="person_weight_kg" value="95" step="1" min="40"/>
-        </div>
-        <div class="field">
-          <label>Prům. zavazadlo/sedadlo (kg)</label>
-          <input type="number" id="baggage_per_seat_kg" value="5" step="1" min="0"/>
-        </div>
-        <div class="field">
-          <label>Nalétané hodiny ročně (h/rok)</label>
-          <input type="number" id="annual_hours" value="80" step="10" min="1"/>
-        </div>
-      </div>
-
-
-      <div class="section-title" style="margin-top:12px;">Velikost písma</div>
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
-        <div class="font-slider" id="font-slider">
-          <input type="radio" name="fontsize" id="fs-small"  value="small"  checked/>
-          <label for="fs-small">Small – 13 pt</label>
-          <input type="radio" name="fontsize" id="fs-medium" value="medium"/>
-          <label for="fs-medium">Medium – 15 pt</label>
-          <input type="radio" name="fontsize" id="fs-large"  value="large"/>
-          <label for="fs-large">Large – 17 pt</label>
-        </div>
-      </div>
-
-      <div class="section-title" style="margin-top:12px;">Jednotky</div>
-      <div style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:4px; align-items:center;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="rate-prefix">Váha:</span>
-          <div class="font-slider" id="weight-slider">
-            <input type="radio" name="weight_unit" id="wu-kg" value="kg" checked/>
-            <label for="wu-kg">kg</label>
-            <input type="radio" name="weight_unit" id="wu-lb" value="lb"/>
-            <label for="wu-lb">lb</label>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="rate-prefix">Objem:</span>
-          <div class="font-slider" id="volume-slider">
-            <input type="radio" name="volume_unit" id="vu-l"   value="l"   checked/>
-            <label for="vu-l">litr</label>
-            <input type="radio" name="volume_unit" id="vu-usg" value="usg"/>
-            <label for="vu-usg">US gal</label>
-            <input type="radio" name="volume_unit" id="vu-img" value="img"/>
-            <label for="vu-img">Imp gal</label>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="rate-prefix">Rychlost:</span>
-          <div class="font-slider" id="speed-slider">
-            <input type="radio" name="speed_unit" id="su-kt"  value="kt"  checked/>
-            <label for="su-kt">kt</label>
-            <input type="radio" name="speed_unit" id="su-kmh" value="kmh"/>
-            <label for="su-kmh">km/h</label>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="rate-prefix">Vzdálenost:</span>
-          <div class="font-slider" id="dist-unit-slider">
-            <input type="radio" name="dist_unit" id="du-nm"  value="nm"  checked/>
-            <label for="du-nm">NM</label>
-            <input type="radio" name="dist_unit" id="du-km"  value="km"/>
-            <label for="du-km">km</label>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="rate-prefix">Měna:</span>
-          <div class="font-slider" id="currency-slider">
-            <input type="radio" name="currency" id="cur-czk" value="CZK" checked/>
-            <label for="cur-czk">CZK</label>
-            <input type="radio" name="currency" id="cur-eur" value="EUR"/>
-            <label for="cur-eur">EUR</label>
-            <input type="radio" name="currency" id="cur-usd" value="USD"/>
-            <label for="cur-usd">USD</label>
-            <input type="radio" name="currency" id="cur-gbp" value="GBP"/>
-            <label for="cur-gbp">GBP</label>
-          </div>
-        </div>
-      </div>
-      <!-- Kurz-pole – zobrazí se jen pro cizí měny -->
-      <div id="currency-rate-row">
-        <div class="rate-field" id="rate-eur">
-          <span class="rate-prefix">1 EUR&nbsp;=</span>
-          <input class="rate-input" type="number" id="eur_to_czk" value="24.545" step="0.001" min="0.1"/>
-          <span class="rate-suffix">CZK</span>
-        </div>
-        <div class="rate-field" id="rate-usd">
-          <span class="rate-prefix">1 USD&nbsp;=</span>
-          <input class="rate-input" type="number" id="usd_to_czk" value="21.315" step="0.001" min="0.1"/>
-          <span class="rate-suffix">CZK</span>
-        </div>
-        <div class="rate-field" id="rate-gbp">
-          <span class="rate-prefix">1 GBP&nbsp;=</span>
-          <input class="rate-input" type="number" id="gbp_to_czk" value="28.299" step="0.001" min="0.1"/>
-          <span class="rate-suffix">CZK</span>
-        </div>
-      </div>
-
-      <div class="section-title" style="margin-top:12px;">Převodní hodnoty (informativně)</div>
-      <div class="conv-grid">
-        <div class="conv-badge">1 US gal = 3.785 l</div>
-        <div class="conv-badge">1 NM = 1.852 km</div>
-        <div class="conv-badge">1 kt = 1.852 km/h</div>
-        <div class="conv-badge">1 kg = 2.205 lbs</div>
-      </div>
-    </div>
-
-    <!-- KARTA: Plán -->
-    <div class="tab-pane" id="tab-plan">
-      <div class="form-grid">
-        <div class="field">
-          <label>Vzdálenost A→B (NM)</label>
-          <input type="number" id="distance_nm" value="200" step="5" min="0"/>
-        </div>
-        <div class="field">
-          <label>Vzdálenost A→B (km)</label>
-          <input type="number" id="distance_km" value="370" step="5" min="0"/>
-        </div>
-        <div class="field">
-          <label>Průměrný vítr (kt) · + zadní / − čelní</label>
-          <input type="number" id="wind_kt" value="0" step="5"/>
-        </div>
-        <div class="field">
-          <label>Cruise Altitude (ft)</label>
-          <input type="number" id="cruise_altitude_ft" value="8000" step="500" min="0" max="25000"/>
-        </div>
-        <div class="field">
-          <label>Alternativa (NM) – jen info</label>
-          <input type="number" id="alternate_nm" value="0" step="5" min="0"/>
-        </div>
-      </div>
-    </div>
-
-    <!-- KARTA: Obsazení -->
-    <div class="tab-pane" id="tab-crew">
+    <!-- KARTA: Posádka (dříve Obsazení) -->
+    <div class="tab-pane active" id="tab-crew">
       <div class="form-grid">
         <!-- PAX 1 – pilot -->
         <div class="field">
@@ -595,6 +724,332 @@
       </div>
     </div>
 
+    <!-- KARTA: Plán -->
+    <div class="tab-pane" id="tab-plan">
+      <div class="form-grid">
+        <div class="field">
+          <label>Vzdálenost A→B (NM)</label>
+          <input type="number" id="distance_nm" value="200" step="5" min="0"/>
+        </div>
+        <div class="field">
+          <label>Vzdálenost A→B (km)</label>
+          <input type="number" id="distance_km" value="370" step="5" min="0"/>
+        </div>
+        <div class="field">
+          <label>Průměrný vítr (kt) · + zadní / − čelní</label>
+          <input type="number" id="wind_kt" value="0" step="5"/>
+        </div>
+        <div class="field">
+          <label>Cruise Altitude (ft)</label>
+          <input type="number" id="cruise_altitude_ft" value="8000" step="500" min="0" max="25000"/>
+        </div>
+        <div class="field">
+          <label>Alternativa (NM) – jen info</label>
+          <input type="number" id="alternate_nm" value="0" step="5" min="0"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- KARTA: Profil letu ───────────────────────────────────────────────── -->
+    <div class="tab-pane" id="tab-profile">
+
+      <!-- Výběr letadla + přehledové karty -->
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:10px;">
+        <div class="field" style="flex:0 0 auto;">
+          <label>Letadlo</label>
+          <select id="profile-plane-select">
+            <option value="">— vyberte letadlo —</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Summary bar: TOW/MTOW/Load Reserve  |  FOB/Trip fuel/Final reserve/Volná kapacita -->
+      <div class="profile-summary" id="profile-summary">
+        <!-- Karta 1: TOW | MTOW | Load Reserve -->
+        <div class="psm-combo" id="psm-combo-weight">
+          <div class="psm-combo-cell">
+            <span class="psm-label">TOW</span>
+            <span class="psm-value" id="ps-tow">–</span>
+          </div>
+          <div class="psm-combo-cell">
+            <span class="psm-label">MTOW</span>
+            <span class="psm-value" id="ps-mtow">–</span>
+          </div>
+          <div class="psm-combo-cell">
+            <span class="psm-label">Load Reserve</span>
+            <span class="psm-value" id="ps-load-reserve">–</span>
+          </div>
+        </div>
+        <!-- Karta 2: FOB | Trip Fuel | Reserve | Contingency | Extra | Volná kapacita -->
+        <div class="psm-combo" id="psm-combo-fuel">
+          <div class="psm-combo-cell">
+            <span class="psm-label">FOB</span>
+            <span class="psm-value" id="ps-fob">–</span>
+          </div>
+          <div class="psm-combo-cell">
+            <span class="psm-label">Trip Fuel</span>
+            <span class="psm-value" id="ps-trip-fuel">–</span>
+          </div>
+          <div class="psm-combo-cell">
+            <span class="psm-label">Final Reserve</span>
+            <span class="psm-value" id="ps-fuel-reserve">–</span>
+          </div>
+          <div class="psm-combo-cell">
+            <span class="psm-label">Contingency 5%</span>
+            <span class="psm-value" id="ps-contingency">–</span>
+          </div>
+          <div class="psm-combo-cell" id="ps-extra-cell" style="display:none;">
+            <span class="psm-label" id="ps-extra-label">Extra</span>
+            <span class="psm-value" id="ps-extra">–</span>
+          </div>
+          <div class="psm-combo-cell">
+            <span class="psm-label">Voln&#225; kapacita</span>
+            <span class="psm-value" id="ps-free-cap">–</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FLIGHT SUMMARY ─────────────────────────────────────────────── -->
+      <div class="flight-summary" id="flight-summary">
+
+        <!-- Společná část -->
+        <div class="fs-section-title">✈ Flight Summary – obecné</div>
+        <div class="fs-row" id="fs-common"></div>
+
+        <!-- Max Power -->
+        <div class="fs-section-title mp">⚡ Max Power (75 %)</div>
+        <div class="fs-row" id="fs-mp"></div>
+
+        <!-- Economy Cruise -->
+        <div class="fs-section-title ec">🍃 Economy Cruise (55 %)</div>
+        <div class="fs-row" id="fs-ec"></div>
+
+      </div><!-- /flight-summary -->
+
+      <!-- ── FLIGHT DETAILS ──────────────────────────────────────────────── -->
+      <div class="flight-details-title">📋 Flight Details</div>
+
+      <!-- Fáze letu -->
+      <div class="flight-phases">
+
+        <!-- DEPARTURE -->
+        <div class="phase-block open" id="phase-departure">
+          <div class="phase-header" onclick="togglePhase('phase-departure')">
+            <span class="phase-icon">🛫</span>
+            <span class="phase-title">Departure</span>
+            <span class="phase-badge active" id="dep-badge">LKPR</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+          <div class="phase-body">
+            <div class="airport-box">
+              <div class="ap-field">
+                <span class="ap-label">ICAO kód</span>
+                <input class="ap-input" id="dep-icao" type="text" value="LKPR" maxlength="4" style="text-transform:uppercase;width:80px;" oninput="this.value=this.value.toUpperCase();updateAirportBadge('dep')"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">Název letiště</span>
+                <input class="ap-input" id="dep-name" type="text" value="Praha Václav Havel" style="min-width:200px;"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">Nadmořská výška (ft)</span>
+                <input class="ap-input" id="dep-elev" type="number" value="1247" step="10" style="width:80px;"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">RWY</span>
+                <input class="ap-input" id="dep-rwy" type="text" value="06/24, 12/30" style="min-width:120px;"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">Délka RWY (m)</span>
+                <input class="ap-input" id="dep-rwy-len" type="number" value="3715" step="50" style="width:80px;"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">Povrch RWY</span>
+                <select class="ap-input" id="dep-rwy-surface">
+                  <option value="asphalt" selected>Asfalt</option>
+                  <option value="concrete">Beton</option>
+                  <option value="grass">Tráva</option>
+                  <option value="gravel">Štěrk</option>
+                  <option value="dirt">Hlína</option>
+                </select>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">QFU (magnetický kurz)</span>
+                <input class="ap-input" id="dep-qfu" type="text" value="060°" style="width:70px;"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLIMB -->
+        <div class="phase-block open" id="phase-climb">
+          <div class="phase-header" onclick="togglePhase('phase-climb')">
+            <span class="phase-icon">↗</span>
+            <span class="phase-title">Climb</span>
+            <span class="phase-badge" id="climb-badge">–</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+          <div class="phase-body">
+            <input type="hidden" id="climb-ias" value="0"/>
+            <!-- Summary + info toggle -->
+            <div class="phase-summary-row">
+              <div id="climb-summary" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+              <button class="info-toggle-btn" id="climb-detail-btn"
+                      onclick="toggleDetailTable('climb')" title="Zobrazit/skrýt podrobnou tabulku">i</button>
+            </div>
+            <!-- Skrytá detail tabulka -->
+            <div class="phase-detail-table" id="climb-detail-table">
+              <table class="phase-table" id="climb-table">
+                <thead><tr>
+                  <th>Alt (ft)</th><th>ROC (ft/min)</th><th>TAS (kt)</th>
+                  <th>FF (l/h)</th><th>Δt (min)</th><th>Δdist (NM)</th>
+                  <th>Kum. čas (min)</th><th>Kum. dist (NM)</th><th>Fuel (l)</th>
+                </tr></thead>
+                <tbody id="climb-tbody">
+                  <tr><td colspan="9" style="color:#5a7090;padding:10px;">Vyberte letadlo…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOP OF CLIMB -->
+        <div class="phase-block open" id="phase-toc">
+          <div class="phase-header" onclick="togglePhase('phase-toc')">
+            <span class="phase-icon">📍</span>
+            <span class="phase-title">Top of Climb</span>
+            <span class="phase-badge" id="toc-badge">–</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+          <div class="phase-body">
+            <div id="toc-info" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+          </div>
+        </div>
+
+        <!-- CRUISE -->
+        <div class="phase-block open" id="phase-cruise">
+          <div class="phase-header" onclick="togglePhase('phase-cruise')">
+            <span class="phase-icon">✈</span>
+            <span class="phase-title">Cruise</span>
+            <span class="phase-badge" id="cruise-badge">–</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+          <div class="phase-body">
+            <div class="cruise-dual">
+              <div class="cruise-panel">
+                <div class="cruise-panel-title mp">⚡ Max Power (75 %)</div>
+                <div class="cruise-cards" id="cruise-mp-info"></div>
+              </div>
+              <div class="cruise-panel">
+                <div class="cruise-panel-title ec">🍃 Economy Cruise (55 %)</div>
+                <div class="cruise-cards" id="cruise-ec-info"></div>
+              </div>
+              <div class="cruise-panel">
+                <div class="cruise-panel-title" style="color:#f5c542;">🎯 Optimum Altitude – Max Power <span style="font-weight:400;color:#8a9ab5;font-size:.85em;">(nejkratší trip time)</span></div>
+                <div class="cruise-cards" id="cruise-opt-mp-info"></div>
+              </div>
+              <div class="cruise-panel">
+                <div class="cruise-panel-title" style="color:#f5c542;">🎯 Optimum Altitude – Economy Cruise <span style="font-weight:400;color:#8a9ab5;font-size:.85em;">(nejnižší total cost)</span></div>
+                <div class="cruise-cards" id="cruise-opt-ec-info"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOP OF DESCENT -->
+        <div class="phase-block open" id="phase-tod">
+          <div class="phase-header" onclick="togglePhase('phase-tod')">
+            <span class="phase-icon">📍</span>
+            <span class="phase-title">Top of Descent</span>
+            <span class="phase-badge" id="tod-badge">–</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+          <div class="phase-body">
+            <div id="tod-info" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+          </div>
+        </div>
+
+        <!-- DESCENT -->
+        <div class="phase-block open" id="phase-descent">
+          <div class="phase-header" onclick="togglePhase('phase-descent')">
+            <span class="phase-icon">↘</span>
+            <span class="phase-title">Descent</span>
+            <span class="phase-badge" id="desc-badge">–</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+          <div class="phase-body">
+            <!-- Summary + info toggle -->
+            <div class="phase-summary-row">
+              <div id="descent-summary" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+              <button class="info-toggle-btn" id="descent-detail-btn"
+                      onclick="toggleDetailTable('descent')" title="Zobrazit/skrýt podrobnou tabulku">i</button>
+            </div>
+            <!-- Skrytá detail tabulka -->
+            <div class="phase-detail-table" id="descent-detail-table">
+              <table class="phase-table" id="descent-table">
+                <thead><tr>
+                  <th>Alt (ft)</th><th>VSI (ft/min)</th><th>TAS (kt)</th>
+                  <th>FF (l/h)</th><th>Δt (min)</th><th>Δdist (NM)</th>
+                  <th>Kum. čas od TOD (min)</th><th>Kum. dist od TOD (NM)</th><th>Fuel (l)</th>
+                </tr></thead>
+                <tbody id="descent-tbody">
+                  <tr><td colspan="9" style="color:#5a7090;padding:10px;">Vyberte letadlo…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESTINATION -->
+        <div class="phase-block open" id="phase-dest">
+          <div class="phase-header" onclick="togglePhase('phase-dest')">
+            <span class="phase-icon">🛬</span>
+            <span class="phase-title">Destination</span>
+            <span class="phase-badge active" id="dest-badge">LKTB</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+          <div class="phase-body">
+            <div class="airport-box">
+              <div class="ap-field">
+                <span class="ap-label">ICAO kód</span>
+                <input class="ap-input" id="dest-icao" type="text" value="LKTB" maxlength="4" style="text-transform:uppercase;width:80px;" oninput="this.value=this.value.toUpperCase();updateAirportBadge('dest')"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">Název letiště</span>
+                <input class="ap-input" id="dest-name" type="text" value="Brno Tuřany" style="min-width:200px;"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">Nadmořská výška (ft)</span>
+                <input class="ap-input" id="dest-elev" type="number" value="778" step="10" style="width:80px;"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">RWY</span>
+                <input class="ap-input" id="dest-rwy" type="text" value="09/27" style="min-width:120px;"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">Délka RWY (m)</span>
+                <input class="ap-input" id="dest-rwy-len" type="number" value="2650" step="50" style="width:80px;"/>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">Povrch RWY</span>
+                <select class="ap-input" id="dest-rwy-surface">
+                  <option value="asphalt" selected>Asfalt</option>
+                  <option value="concrete">Beton</option>
+                  <option value="grass">Tráva</option>
+                  <option value="gravel">Štěrk</option>
+                  <option value="dirt">Hlína</option>
+                </select>
+              </div>
+              <div class="ap-field">
+                <span class="ap-label">QFU (magnetický kurz)</span>
+                <input class="ap-input" id="dest-qfu" type="text" value="090°" style="width:70px;"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /flight-phases -->
+    </div><!-- /tab-profile -->
+
     <!-- KARTA: Hangár -->
     <div class="tab-pane" id="tab-hangar">
       <div style="display:flex; align-items:center; gap:12px; padding:6px 0;">
@@ -606,6 +1061,103 @@
         <span style="font-size:.85em; color:#5a6880;" id="hangar-status">–</span>
       </div>
     </div>
+
+    <!-- KARTA: Obecné (gear) -->
+    <div class="tab-pane" id="tab-general">
+      <div class="form-grid">
+        <div class="field">
+          <label>Cena AVGAS (CZK/l)</label>
+          <input type="number" id="avgas_price" value="75" step="0.5" min="0"/>
+        </div>
+        <div class="field">
+          <label>Cena JET A-1 (CZK/l)</label>
+          <input type="number" id="jet_a1_price" value="45" step="0.5" min="0"/>
+        </div>
+        <div class="field">
+          <label>Hustota AVGAS (kg/l)</label>
+          <input type="number" id="avgas_density" value="0.72" step="0.01" min="0.5" max="1"/>
+        </div>
+        <div class="field">
+          <label>Hustota JET A-1 (kg/l)</label>
+          <input type="number" id="jet_a1_density" value="0.81" step="0.01" min="0.5" max="1"/>
+        </div>
+        <div class="field">
+          <label>Palivová rezerva (min)</label>
+          <input type="number" id="fuel_reserve_min" value="30" step="5" min="0"/>
+        </div>
+        <div class="field">
+          <label>Prům. váha osoby (kg)</label>
+          <input type="number" id="person_weight_kg" value="95" step="1" min="40"/>
+        </div>
+        <div class="field">
+          <label>Prům. zavazadlo/sedadlo (kg)</label>
+          <input type="number" id="baggage_per_seat_kg" value="5" step="1" min="0"/>
+        </div>
+        <div class="field">
+          <label>Nalétané hodiny ročně (h/rok)</label>
+          <input type="number" id="annual_hours" value="80" step="10" min="1"/>
+        </div>
+      </div>
+
+      <!-- Extra fuel -->
+      <div class="section-title" style="margin-top:12px;">Extra palivo (FOB = Trip + Rezerva + Contingency 5% + Extra)</div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px;">
+        <div class="font-slider" id="extra-fuel-slider">
+          <input type="radio" name="extra_fuel_type" id="eft-none"     value="none"     checked/>
+          <label for="eft-none">Žádné</label>
+          <input type="radio" name="extra_fuel_type" id="eft-absolute" value="absolute"/>
+          <label for="eft-absolute">Litry</label>
+          <input type="radio" name="extra_fuel_type" id="eft-percent"  value="percent"/>
+          <label for="eft-percent">% Trip fuel</label>
+          <input type="radio" name="extra_fuel_type" id="eft-time"     value="time"/>
+          <label for="eft-time">Minuty</label>
+        </div>
+        <div id="extra-fuel-value-wrap" style="display:none; align-items:center; gap:6px;">
+          <input type="number" id="extra_fuel_value" value="0" step="1" min="0"
+                 style="background:#1a1d23;border:1px solid #3a4050;border-radius:4px;
+                        color:#d4d8e0;padding:5px 8px;font-size:1em;width:90px;"/>
+          <span id="extra-fuel-unit-label" style="font-size:.9em;color:#8a9ab5;">l</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:14px;">Velikost p&#237;sma</div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+        <div class="font-slider" id="font-slider">
+          <input type="radio" name="fontsize" id="fs-small"  value="small"  checked/>
+          <label for="fs-small">Small – 13 pt</label>
+          <input type="radio" name="fontsize" id="fs-medium" value="medium"/>
+          <label for="fs-medium">Medium – 15 pt</label>
+          <input type="radio" name="fontsize" id="fs-large"  value="large"/>
+          <label for="fs-large">Large – 17 pt</label>
+        </div>
+      </div>
+      <div class="section-title" style="margin-top:12px;">M&#283;nov&#233; kurzy</div>
+      <div id="currency-rate-row">
+        <div class="rate-field" id="rate-eur">
+          <span class="rate-prefix">1 EUR&nbsp;=</span>
+          <input class="rate-input" type="number" id="eur_to_czk" value="24.545" step="0.001" min="0.1"/>
+          <span class="rate-suffix">CZK</span>
+        </div>
+        <div class="rate-field" id="rate-usd">
+          <span class="rate-prefix">1 USD&nbsp;=</span>
+          <input class="rate-input" type="number" id="usd_to_czk" value="21.315" step="0.001" min="0.1"/>
+          <span class="rate-suffix">CZK</span>
+        </div>
+        <div class="rate-field" id="rate-gbp">
+          <span class="rate-prefix">1 GBP&nbsp;=</span>
+          <input class="rate-input" type="number" id="gbp_to_czk" value="28.299" step="0.001" min="0.1"/>
+          <span class="rate-suffix">CZK</span>
+        </div>
+      </div>
+      <div class="section-title" style="margin-top:12px;">Převodní hodnoty (informativně)</div>
+      <div class="conv-grid">
+        <div class="conv-badge">1 US gal = 3.785 l</div>
+        <div class="conv-badge">1 NM = 1.852 km</div>
+        <div class="conv-badge">1 kt = 1.852 km/h</div>
+        <div class="conv-badge">1 kg = 2.205 lbs</div>
+      </div>
+    </div>
+
   </div><!-- /top-panel -->
 
   <!-- ═══ HANGÁR PANEL (celá stránka, mimo top-panel) ════════════════════ -->
@@ -823,21 +1375,37 @@ document.querySelectorAll('input[name="type_filter"]').forEach(radio => {
 
 /* ── Tabs ─────────────────────────────────────────────────────────────── */
 let hangarLoaded = false;
+
+function activateTab(tabName) {
+  const isHangar  = tabName === 'hangar';
+  const isProfile = tabName === 'profile';
+  // Deaktivuj všechny tab-btn + gear
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-gear').classList.remove('active');
+  // Aktivuj správný btn
+  const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+  if (btn) btn.classList.add('active');
+  if (tabName === 'general') document.getElementById('btn-gear').classList.add('active');
+  // Přepni pane
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  const pane = document.getElementById('tab-' + tabName);
+  if (pane) pane.classList.add('active');
+  // Hangár specifika
+  document.body.classList.toggle('hangar-active', isHangar);
+  document.body.classList.toggle('profile-active', isProfile);
+  document.getElementById('bottom-panel').style.display = isHangar ? 'none' : '';
+  document.getElementById('hangar-panel').classList.toggle('active', isHangar);
+  if (isHangar && !hangarLoaded) { hangarLoaded = true; loadHangar(); }
+  // Profil letu – skryj bottom-panel taky
+  document.getElementById('bottom-panel').style.display = (isHangar || isProfile) ? 'none' : '';
+  // Při přepnutí na profil aktualizuj select
+  if (isProfile) populatePlaneSelect();
+}
+
 document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const isHangar = btn.dataset.tab === 'hangar';
-    // Přepni tab-pane (Hangár teď také má tab-pane s hledáním)
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    // Hangár: skryj výsledkovou tabulku, zobraz hangár tabulku
-    document.body.classList.toggle('hangar-active', isHangar);
-    document.getElementById('bottom-panel').style.display = isHangar ? 'none' : '';
-    document.getElementById('hangar-panel').classList.toggle('active', isHangar);
-    if (isHangar && !hangarLoaded) { hangarLoaded = true; loadHangar(); }
-  });
+  btn.addEventListener('click', () => activateTab(btn.dataset.tab));
 });
+document.getElementById('btn-gear').addEventListener('click', () => activateTab('general'));
 
 /* ── Font-size slider ─────────────────────────────────────────────────── */
 const FONT_SIZES = { small: '13px', medium: '15px', large: '17px' };
@@ -1009,6 +1577,745 @@ function updateCostHeaders(sym) {
   document.querySelectorAll('.cost-sym').forEach(el => { el.textContent = sym; });
 }
 
+/* ── Karta Profil letu ────────────────────────────────────────────────── */
+
+// Pomocné utility
+function togglePhase(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+function updateAirportBadge(prefix) {
+  const icao = document.getElementById(prefix + '-icao').value || '????';
+  document.getElementById(prefix + '-badge').textContent = icao;
+}
+function toggleDetailTable(prefix) {
+  const tbl = document.getElementById(prefix + '-detail-table');
+  const btn = document.getElementById(prefix + '-detail-btn');
+  if (!tbl) return;
+  const visible = tbl.classList.toggle('visible');
+  if (btn) btn.classList.toggle('active', visible);
+}
+
+// Naplnění selectu letadel z lastPlanes
+function populatePlaneSelect() {
+  const sel = document.getElementById('profile-plane-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— vyberte letadlo —</option>';
+  if (!lastPlanes.length) return;
+
+  // Seřadit všechna letadla: výrobce A→Z, pak designation A→Z, pak name A→Z
+  const sorted = [...lastPlanes].sort((a, b) => {
+    const mfA = (a.manufacturer || '').toLowerCase();
+    const mfB = (b.manufacturer || '').toLowerCase();
+    if (mfA !== mfB) return mfA.localeCompare(mfB);
+    const dA = (a.designation || '').toLowerCase();
+    const dB = (b.designation || '').toLowerCase();
+    if (dA !== dB) return dA.localeCompare(dB);
+    return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+  });
+
+  // Vhodná letadla – seskupit dle výrobce do <optgroup>
+  const suitable   = sorted.filter(p => p.suitable);
+  const unsuitable = sorted.filter(p => !p.suitable);
+
+  function addGroup(planes, prefix) {
+    // Seskup dle výrobce
+    const byMfr = new Map();
+    planes.forEach(p => {
+      const mfr = p.manufacturer || '–';
+      if (!byMfr.has(mfr)) byMfr.set(mfr, []);
+      byMfr.get(mfr).push(p);
+    });
+    byMfr.forEach((list, mfr) => {
+      const grp = document.createElement('optgroup');
+      grp.label = prefix + mfr;
+      list.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.designation + '|' + (p.name || '');
+        opt.textContent = p.designation + (p.name ? '  ' + p.name : '');
+        if (!p.suitable) opt.style.color = '#5a7090';
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
+    });
+  }
+
+  addGroup(suitable, '');
+  if (unsuitable.length) addGroup(unsuitable, '⚠ ');
+
+  if (cur) sel.value = cur;
+  if (sel.value) calcProfile();
+}
+
+document.getElementById('profile-plane-select').addEventListener('change', calcProfile);
+
+// Konstanty
+const KT_TO_NM_PER_MIN = 1 / 60;  // kt × min = NM
+const FT_PER_NM = 6076.12;         // 1 NM = 6076 ft
+const KMH_TO_KT_PROF = 1.0 / 1.852;
+
+function calcProfile() {
+  const selVal = document.getElementById('profile-plane-select').value;
+  if (!selVal || !lastPlanes.length) return;
+  const [desig, name] = selVal.split('|');
+  const plane = lastPlanes.find(p => p.designation === desig && (p.name || '') === (name || ''));
+  if (!plane) return;
+
+  const cruiseAlt   = parseFloat(document.getElementById('cruise_altitude_ft').value) || 8000;
+  const depElev     = parseFloat(document.getElementById('dep-elev').value)  || 0;
+  const destElev    = parseFloat(document.getElementById('dest-elev').value) || 0;
+  const distNM      = parseFloat(document.getElementById('distance_nm').value) || 200;
+  const windKt      = parseFloat(document.getElementById('wind_kt').value) || 0;
+  const fuelResMins = parseFloat(document.getElementById('fuel_reserve_min').value) || 30;
+  const fuelDens    = plane.fuel_type && plane.fuel_type.includes('JET')
+                      ? parseFloat(document.getElementById('jet_a1_density').value) || 0.81
+                      : parseFloat(document.getElementById('avgas_density').value) || 0.72;
+
+  const mp = plane.max_power   || {};
+  const ec = plane.econ_cruise || {};
+
+  // Cruise climb speed z CSV (kt) – zobraz jako needitovatelný údaj
+  const ccKt  = plane.cruise_climb_kt  || 0;
+  const ccKmh = plane.cruise_climb_kmh || 0;
+  const climbIASDisplay = document.getElementById('climb-ias-display');
+  if (climbIASDisplay) {
+    if (ccKt > 0) {
+      const ccDisp = getSpeedUnit() === 'kmh'
+        ? `${Math.round(ccKmh)}\u00a0km/h`
+        : `${Math.round(ccKt)}\u00a0kt`;
+      climbIASDisplay.value = ccDisp;
+    } else {
+      climbIASDisplay.value = '– (data nedostupná)';
+    }
+  }
+  const climbIAS = ccKt > 0 ? ccKt : (mp.v_kt || 110);
+
+  // ── SUMMARY BAR ──────────────────────────────────────────────────────────
+  const useful_load = parseFloat(plane.useful_load) || 0;
+  const empty_wt         = parseFloat(plane.empty_weight) || 0;
+  const mtow             = parseFloat(plane.mtow) || 0;
+  const payload          = plane.payload_kg || 0;
+  const fob              = ec.fob_l              || 0;
+  const tripFuel         = ec.trip_fuel_l         || 0;
+  const reserveFuel      = ec.reserve_fuel_l       || 0;
+  const contingencyFuel  = ec.contingency_fuel_l   || 0;
+  const extraFuel        = ec.extra_fuel_l          || 0;
+  const tow              = empty_wt + payload + (fob * fuelDens);
+  const loadRes          = useful_load - payload - (fob * fuelDens);
+  const fuelCapL         = parseFloat(plane.fuel_cap_l) || 0;
+  const freeCap          = fuelCapL > 0 ? Math.max(0, fuelCapL - fob) : null;
+
+  // Extra fuel label dle zvoleného typu
+  const extraTypeLabel = { none: 'Extra', absolute: 'Extra (l)', percent: 'Extra (%TF)', time: 'Extra (min)' };
+  const extraFuelType  = document.querySelector('input[name="extra_fuel_type"]:checked')?.value || 'none';
+  const extraCellEl    = document.getElementById('ps-extra-cell');
+  const extraLabelEl   = document.getElementById('ps-extra-label');
+  if (extraCellEl)  extraCellEl.style.display  = extraFuelType === 'none' ? 'none' : '';
+  if (extraLabelEl) extraLabelEl.textContent    = extraTypeLabel[extraFuelType] || 'Extra';
+
+  function psv(id, val, unit, cls) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const disp = isNaN(val) ? '–' : (+val.toFixed(1)) % 1 === 0
+      ? Math.round(val).toLocaleString('cs-CZ') + '\u00a0' + unit
+      : (+val.toFixed(1)).toLocaleString('cs-CZ') + '\u00a0' + unit;
+    el.textContent = disp;
+    el.className = 'psm-value' + (cls ? ' ' + cls : '');
+  }
+  // Hmotnosti – respektovat zvolenou jednotku
+  psv('ps-tow',          convertWt(tow),              wtUnit(), tow > mtow ? 'err' : 'ok');
+  psv('ps-mtow',         convertWt(mtow),             wtUnit());
+  psv('ps-load-reserve', convertWt(loadRes),          wtUnit(), loadRes < 0 ? 'err' : loadRes < 20 ? 'warn' : 'ok');
+  // Paliva – respektovat zvolenou jednotku
+  psv('ps-fob',          convertVol(fob),             volUnit(), fuelCapL > 0 && fob > fuelCapL ? 'err' : '');
+  psv('ps-trip-fuel',    convertVol(tripFuel),        volUnit());
+  psv('ps-fuel-reserve', convertVol(reserveFuel),     volUnit());
+  psv('ps-contingency',  convertVol(contingencyFuel), volUnit());
+  if (extraFuelType !== 'none') psv('ps-extra', convertVol(extraFuel), volUnit());
+  if (freeCap !== null) psv('ps-free-cap', convertVol(freeCap), volUnit(), freeCap < 0 ? 'err' : '');
+  else { const el = document.getElementById('ps-free-cap'); if (el) { el.textContent = '–'; el.className = 'psm-value'; } }
+
+  // ── CLIMB PROFILE z CSV dat ───────────────────────────────────────────────
+  const climbData = plane.climb_data || [];
+  const startAlt = Math.max(depElev, 0);
+  const endAlt   = Math.min(cruiseAlt, 12000);
+
+  function interpClimbTime(altFt) {
+    const cps = climbData.filter(d => d.cum_time_min !== null);
+    if (!cps.length) return null;
+    if (altFt <= 0) return 0;
+    for (let i = 0; i < cps.length; i++) {
+      if (cps[i].alt_ft >= altFt) {
+        if (i === 0) return cps[0].alt_ft > 0 ? cps[0].cum_time_min * (altFt / cps[0].alt_ft) : 0;
+        const pr = cps[i-1], cu = cps[i];
+        const frac = (altFt - pr.alt_ft) / (cu.alt_ft - pr.alt_ft);
+        return pr.cum_time_min + frac * (cu.cum_time_min - pr.cum_time_min);
+      }
+    }
+    return cps[cps.length-1].cum_time_min;
+  }
+  function interpClimbFF(altFt) {
+    const cps = climbData.filter(d => d.ff_lph !== null);
+    if (!cps.length) return (mp.ff_lph || 50) * 0.9;
+    for (let i = 0; i < cps.length; i++) {
+      if (cps[i].alt_ft >= altFt) {
+        if (i === 0) return cps[0].ff_lph;
+        const pr = cps[i-1], cu = cps[i];
+        const frac = (altFt - pr.alt_ft) / (cu.alt_ft - pr.alt_ft);
+        return pr.ff_lph + frac * (cu.ff_lph - pr.ff_lph);
+      }
+    }
+    return cps[cps.length-1].ff_lph;
+  }
+  function interpClimbROC(altFt) {
+    const cps = climbData.filter(d => d.roc !== null);
+    if (!cps.length) return Math.max(150, 700 - altFt * 0.035);
+    for (let i = 0; i < cps.length; i++) {
+      if (cps[i].alt_ft >= altFt) {
+        if (i === 0) return cps[0].roc;
+        const pr = cps[i-1], cu = cps[i];
+        const frac = (altFt - pr.alt_ft) / (cu.alt_ft - pr.alt_ft);
+        return pr.roc + frac * (cu.roc - pr.roc);
+      }
+    }
+    return cps[cps.length-1].roc;
+  }
+
+  const climbSegAlts = [...new Set([4000, 8000, 12000].filter(a => a > startAlt && a <= endAlt))];
+  if (!climbSegAlts.length || climbSegAlts[climbSegAlts.length-1] < endAlt) {
+    if (endAlt > startAlt) climbSegAlts.push(endAlt);
+  }
+
+  let climbSegs = [];
+  let prevCumT  = interpClimbTime(startAlt) || 0;
+  let cumFuelL  = 0, cumDistNM = 0;
+  const ccTasKt = climbIAS;
+
+  climbSegAlts.forEach(segAlt => {
+    const cumTimeMins = interpClimbTime(segAlt) || 0;
+    const dtMins = Math.max(0, cumTimeMins - prevCumT);
+    const midAlt = (segAlt + (climbSegs.length ? climbSegAlts[climbSegs.length-1] : startAlt)) / 2;
+    const avgFF  = interpClimbFF(midAlt);
+    const roc    = interpClimbROC(midAlt);
+    const dtHr   = dtMins / 60;
+    const gs     = ccTasKt + windKt;
+    const dDist  = Math.max(0, gs * dtHr);
+    const dFuel  = avgFF * dtHr;
+    cumFuelL    += dFuel;
+    cumDistNM   += dDist;
+    climbSegs.push({
+      alt:  Math.round(segAlt), roc: Math.round(roc), tas: Math.round(ccTasKt),
+      ff:   Math.round(avgFF * 10) / 10, dt: Math.round(dtMins), dd: Math.round(dDist * 10) / 10,
+      cumT: Math.round(cumTimeMins), cumD: Math.round(cumDistNM * 10) / 10,
+      cumF: Math.round(cumFuelL * 10) / 10,
+    });
+    prevCumT = cumTimeMins;
+  });
+
+  const tocTimeMins = climbSegs.length ? climbSegs[climbSegs.length-1].cumT : 0;
+  const tocDistNM   = cumDistNM;
+  const tocFuelL    = climbSegs.length ? climbSegs[climbSegs.length-1].cumF : 0;
+
+  // Aktualizuj záhlaví climb tabulky dle jednotek
+  const climbThead = document.querySelector('#climb-table thead tr');
+  if (climbThead) {
+    climbThead.innerHTML = `
+      <th>Alt (ft)</th><th>ROC (ft/min)</th><th>TAS (${spdUnit()})</th>
+      <th>FF (${volUnit()}/h)</th><th>Δt (min)</th><th>Δdist (${distUnit()})</th>
+      <th>Kum. čas (min)</th><th>Kum. dist (${distUnit()})</th><th>Fuel (${volUnit()})</th>`;
+  }
+
+  const cTbody = document.getElementById('climb-tbody');
+  if (climbData.length && climbData.some(d => d.roc !== null)) {
+    cTbody.innerHTML = climbSegs.map(s => `
+      <tr>
+        <td class="highlight">${s.alt.toLocaleString('cs-CZ')}</td>
+        <td>${s.roc}</td>
+        <td>${fmtSpdKt(s.tas)}</td>
+        <td>${fmtFFVal(s.ff)}</td>
+        <td>${s.dt}</td>
+        <td>${fmtDist(s.dd)}</td>
+        <td>${s.cumT}</td>
+        <td>${fmtDist(s.cumD)}</td>
+        <td>${fmtVolVal(s.cumF)}</td>
+      </tr>`).join('');
+  } else {
+    cTbody.innerHTML = '<tr><td colspan="9" style="color:#5a7090;padding:10px;">Data climb z POH nejsou k dispozici.</td></tr>';
+  }
+
+  // Climb summary karty – unit-aware
+  const climbSummaryEl = document.getElementById('climb-summary');
+  if (climbSummaryEl) {
+    climbSummaryEl.innerHTML = [
+      psCard('Vzdálenost stoupání', fmtDist(tocDistNM)),
+      psCard('Čas stoupání',        fmtMins(tocTimeMins)),
+      psCard(`Cruise Climb TAS`,    ccKt > 0 ? fmtSpdKt(ccKt) : '–'),
+      psCard('Palivo stoupání',     fmtVolVal(tocFuelL)),
+    ].join('');
+  }
+
+  document.getElementById('climb-badge').textContent =
+    `${fmtMins(tocTimeMins)} / ${fmtDist(tocDistNM)}`;
+  document.getElementById('toc-badge').textContent =
+    `${fmtDist(tocDistNM)} od departure`;
+  document.getElementById('toc-info').innerHTML = [
+    psCard('Vzdálenost od departure', fmtDist(tocDistNM)),
+    psCard('Čas od vzletu',           fmtMins(tocTimeMins)),
+    psCard('Palivo stoupání',         fmtVolVal(tocFuelL)),
+  ].join('');
+
+  // ── CRUISE – DUAL PANEL (MP + EC) ────────────────────────────────────────
+  const cruisePoh  = plane.cruise_poh || [];
+
+  // Lineární interpolace POH hodnot pro libovolnou výšku
+  // tasKey / ffKey … název klíče v pohRow, např. 'mp_tas_kmh'
+  function interpCruisePoh(altFt, tasKey, ffKey) {
+    // Odfiltrujeme pouze řádky, které mají obě hodnoty
+    const valid = cruisePoh.filter(r => r[tasKey] != null && r[ffKey] != null)
+                            .sort((a, b) => a.alt_ft - b.alt_ft);
+    if (!valid.length) return { tasKmh: null, ffLph: null, srcLabel: null };
+
+    // Extrapolace dolů – pod nejnižší dostupný bod
+    if (altFt <= valid[0].alt_ft) {
+      return { tasKmh: valid[0][tasKey], ffLph: valid[0][ffKey],
+               srcLabel: valid[0].alt_ft };
+    }
+    // Extrapolace nahoru – nad nejvyšší dostupný bod
+    if (altFt >= valid[valid.length - 1].alt_ft) {
+      const last = valid[valid.length - 1];
+      return { tasKmh: last[tasKey], ffLph: last[ffKey],
+               srcLabel: last.alt_ft };
+    }
+    // Interpolace mezi dvěma sousedy
+    for (let i = 0; i < valid.length - 1; i++) {
+      const lo = valid[i], hi = valid[i + 1];
+      if (altFt >= lo.alt_ft && altFt <= hi.alt_ft) {
+        const frac = (altFt - lo.alt_ft) / (hi.alt_ft - lo.alt_ft);
+        return {
+          tasKmh:   lo[tasKey] + frac * (hi[tasKey] - lo[tasKey]),
+          ffLph:    lo[ffKey]  + frac * (hi[ffKey]  - lo[ffKey]),
+          srcLabel: null, // interpolováno – žádný konkrétní POH bod
+          loAlt: lo.alt_ft, hiAlt: hi.alt_ft,
+        };
+      }
+    }
+    return { tasKmh: null, ffLph: null, srcLabel: null };
+  }
+
+  // Odhad vzdálenosti klesání (pro výpočet cruise dist)
+  const descentAltForEst = cruiseAlt - destElev;
+  const DESCENT_GRAD = 300;
+  const todDistEstNM = descentAltForEst / DESCENT_GRAD;
+
+  function renderCruisePanel(containerId, vKt, ffLph, interpResult) {
+    if (!vKt || !ffLph) {
+      const el = document.getElementById(containerId);
+      if (el) el.innerHTML = '<span style="color:#5a7090">Data nedostupná</span>';
+      return { crsGS:1, crsDistNM:0, crsTimeH:0, crsFuelL:0, activeTasKt: vKt };
+    }
+
+    const pohTasKt  = interpResult?.tasKmh != null ? interpResult.tasKmh * KMH_TO_KT_PROF : null;
+    const pohFFLph  = interpResult?.ffLph  != null ? interpResult.ffLph  : null;
+    const activeTasKt = pohTasKt !== null ? pohTasKt : vKt;
+    const activeFFLph = pohFFLph !== null ? pohFFLph : ffLph;
+
+    // Popisek zdroje dat pod hodnotou
+    let srcNote;
+    if (interpResult?.srcLabel != null) {
+      // Přesná tabulková výška
+      srcNote = 'POH @ ' + interpResult.srcLabel.toLocaleString('cs-CZ') + '\u00a0ft';
+    } else if (interpResult?.loAlt != null) {
+      // Interpolováno
+      srcNote = 'POH interp. ' + interpResult.loAlt.toLocaleString('cs-CZ')
+              + '–' + interpResult.hiAlt.toLocaleString('cs-CZ') + '\u00a0ft';
+    } else {
+      srcNote = 'CSV\u00a0(prům.)';
+    }
+
+    const gs        = activeTasKt + windKt;
+    const crsDistNM = Math.max(0, distNM - tocDistNM - todDistEstNM);
+    const crsTimeH  = gs > 0 ? crsDistNM / gs : 0;
+    const crsFuelL  = activeFFLph * crsTimeH;
+
+    const el = document.getElementById(containerId);
+    if (el) el.innerHTML = [
+      psCard('Hladina',           cruiseAlt.toLocaleString('cs-CZ') + '\u00a0ft'),
+      `<div class="psm-card"><div class="psm-label">TAS</div><div class="psm-value">${fmtSpdKt(activeTasKt)}</div><div style="font-size:.7em;color:#5a7090;margin-top:1px;">${srcNote}</div></div>`,
+      psCard('GS',                fmtSpdKt(gs)),
+      `<div class="psm-card"><div class="psm-label">FF</div><div class="psm-value">${fmtFFVal(activeFFLph)}</div><div style="font-size:.7em;color:#5a7090;margin-top:1px;">${srcNote}</div></div>`,
+      psCard('Vzdálenost cruise',  fmtDist(crsDistNM)),
+      psCard('Čas cruise',         fmtMins(crsTimeH * 60)),
+      psCard('Palivo cruise',      fmtVolVal(crsFuelL)),
+    ].join('');
+    return { crsGS: gs, crsDistNM, crsTimeH, crsFuelL, activeTasKt };
+  }
+
+  const mpV  = mp.v_kt   || 0, mpFF = mp.ff_lph || 0;
+  const ecV  = ec.v_kt   || 0, ecFF = ec.ff_lph || 0;
+  const mpInterp = interpCruisePoh(cruiseAlt, 'mp_tas_kmh', 'mp_ff_lph');
+  const ecInterp = interpCruisePoh(cruiseAlt, 'ec_tas_kmh', 'ec_ff_lph');
+  const mpCruise = renderCruisePanel('cruise-mp-info', mpV, mpFF, mpInterp);
+  const ecCruise = renderCruisePanel('cruise-ec-info', ecV, ecFF, ecInterp);
+
+  // ── OPTIMUM ALTITUDE ────────────────────────────────────────────────────
+  const DESCENT_GRAD_OPT = 300; // ft/min
+
+  // Formátování optimální výšky: pod 10 000 ft → "Optimum Alt." + "n 000 ft"
+  //                              nad 10 000 ft → "Optimum FL"   + "FL nnn"
+  function fmtOptAlt(altFt) {
+    const rounded = Math.round(altFt / 1000) * 1000;
+    if (altFt < 10000) {
+      return {
+        label: 'Optimum Alt.',
+        value: (rounded / 1000).toLocaleString('cs-CZ') + '\u00a0000\u00a0ft',
+        sub:   altFt.toLocaleString('cs-CZ') + '\u00a0ft',
+      };
+    } else {
+      const fl = String(Math.round(altFt / 100)).padStart(3, '0');
+      return {
+        label: 'Optimum FL',
+        value: 'FL' + fl,
+        sub:   altFt.toLocaleString('cs-CZ') + '\u00a0ft',
+      };
+    }
+  }
+
+  // MP optimum: nejkratší celkový čas letu → hledáme nejvyšší GS (nejvyšší MP TAS výška)
+  (function renderOptMP() {
+    const el = document.getElementById('cruise-opt-mp-info');
+    if (!el) return;
+
+    const pohLevels = cruisePoh.filter(r =>
+      r.mp_tas_kmh && r.mp_ff_lph && r.mp_tas_kmh > 0 && r.mp_ff_lph > 0
+    );
+    if (!pohLevels.length) {
+      el.innerHTML = '<span style="color:#5a7090">Nedostatek POH dat pro výpočet</span>';
+      return;
+    }
+
+    // Nejkratší čas = minimalizujeme totalTimeH
+    let best = null;
+    pohLevels.forEach(poh => {
+      const altFt = poh.alt_ft;
+      if (altFt < depElev) return;
+      const tasKt = poh.mp_tas_kmh * KMH_TO_KT_PROF;
+      const ffLph = poh.mp_ff_lph;
+      const gs    = tasKt + windKt;
+
+      const climbTimeMins = interpClimbTime(Math.min(altFt, 12000)) || 0;
+      const climbTimeH    = climbTimeMins / 60;
+      const climbFFAvg    = interpClimbFF(altFt / 2);
+      const climbFuelL    = climbFFAvg * climbTimeH;
+      const climbDistNM   = (ccTasKt + windKt) * climbTimeH;
+
+      const descDistNM  = Math.max(0, (altFt - destElev) / DESCENT_GRAD_OPT);
+      const descTimeH   = (altFt - destElev) / DESCENT_GRAD_OPT / 60;
+      const descFuelL   = ffLph * 0.55 * descTimeH;
+
+      const crsDist  = Math.max(0, distNM - climbDistNM - descDistNM);
+      const crsTimeH = gs > 0 ? crsDist / gs : 0;
+      const crsFuelL = ffLph * crsTimeH;
+
+      const totalTimeH = climbTimeH + crsTimeH + descTimeH;
+      const totalFuelL = climbFuelL + crsFuelL + descFuelL;
+
+      if (!best || totalTimeH < best.totalTimeH) {
+        best = { altFt, tasKt, ffLph, gs, climbFuelL, crsFuelL, descFuelL, totalFuelL, totalTimeH, crsDist, crsTimeH };
+      }
+    });
+
+    if (!best) { el.innerHTML = '<span style="color:#5a7090">Nelze určit</span>'; return; }
+
+    const optLabelMP = fmtOptAlt(best.altFt);
+    el.innerHTML = [
+      `<div class="psm-card" style="border-color:#f5c542;"><div class="psm-label">${optLabelMP.label}</div><div class="psm-value" style="color:#f5c542;">${optLabelMP.value}</div><div style="font-size:.7em;color:#5a7090;margin-top:1px;">${optLabelMP.sub}</div></div>`,
+      psCard('TAS', fmtSpdKt(best.tasKt)),
+      psCard('GS',  fmtSpdKt(best.gs)),
+      psCard('FF', fmtFFVal(best.ffLph)),
+      psCard('Vzdálenost cruise', fmtDist(best.crsDist)),
+      psCard('Celkový čas', fmtMins(best.totalTimeH * 60)),
+      psCard('Čas cruise',  fmtMins(best.crsTimeH * 60)),
+      psCard('Celkové palivo', fmtVolVal(best.totalFuelL)),
+    ].join('');
+  })();
+
+  // EC optimum: nejnižší total cost = minimalizujeme celkovou spotřebu paliva
+  (function renderOptEC() {
+    const el = document.getElementById('cruise-opt-ec-info');
+    if (!el) return;
+
+    const pohLevels = cruisePoh.filter(r =>
+      r.ec_tas_kmh && r.ec_ff_lph && r.ec_tas_kmh > 0 && r.ec_ff_lph > 0
+    );
+    if (!pohLevels.length) {
+      el.innerHTML = '<span style="color:#5a7090">Nedostatek POH dat pro výpočet</span>';
+      return;
+    }
+
+    // Nejnižší celkové náklady = minimalizujeme totalFuelL
+    let best = null;
+    pohLevels.forEach(poh => {
+      const altFt = poh.alt_ft;
+      if (altFt < depElev) return;
+      const tasKt = poh.ec_tas_kmh * KMH_TO_KT_PROF;
+      const ffLph = poh.ec_ff_lph;
+      const gs    = tasKt + windKt;
+
+      const climbTimeMins = interpClimbTime(Math.min(altFt, 12000)) || 0;
+      const climbTimeH    = climbTimeMins / 60;
+      const climbFFAvg    = interpClimbFF(altFt / 2);
+      const climbFuelL    = climbFFAvg * climbTimeH;
+      const climbDistNM   = (ccTasKt + windKt) * climbTimeH;
+
+      const descDistNM  = Math.max(0, (altFt - destElev) / DESCENT_GRAD_OPT);
+      const descTimeH   = (altFt - destElev) / DESCENT_GRAD_OPT / 60;
+      const descFuelL   = ffLph * 0.55 * descTimeH;
+
+      const crsDist  = Math.max(0, distNM - climbDistNM - descDistNM);
+      const crsTimeH = gs > 0 ? crsDist / gs : 0;
+      const crsFuelL = ffLph * crsTimeH;
+
+      const totalFuelL = climbFuelL + crsFuelL + descFuelL;
+      const totalTimeH = climbTimeH + crsTimeH + descTimeH;
+
+      if (!best || totalFuelL < best.totalFuelL) {
+        best = { altFt, tasKt, ffLph, gs, climbFuelL, crsFuelL, descFuelL, totalFuelL, totalTimeH, crsDist, crsTimeH };
+      }
+    });
+
+    if (!best) { el.innerHTML = '<span style="color:#5a7090">Nelze určit</span>'; return; }
+
+    const optLabelEC = fmtOptAlt(best.altFt);
+    el.innerHTML = [
+      `<div class="psm-card" style="border-color:#f5c542;"><div class="psm-label">${optLabelEC.label}</div><div class="psm-value" style="color:#f5c542;">${optLabelEC.value}</div><div style="font-size:.7em;color:#5a7090;margin-top:1px;">${optLabelEC.sub}</div></div>`,
+      psCard('TAS', fmtSpdKt(best.tasKt)),
+      psCard('GS',  fmtSpdKt(best.gs)),
+      psCard('FF', fmtFFVal(best.ffLph)),
+      psCard('Vzdálenost cruise', fmtDist(best.crsDist)),
+      psCard('Celkový čas',  fmtMins(best.totalTimeH * 60)),
+      psCard('Čas cruise',   fmtMins(best.crsTimeH   * 60)),
+      psCard('Celkové palivo', fmtVolVal(best.totalFuelL)),
+      psCard('z toho stoupání', fmtVolVal(best.climbFuelL)),
+      psCard('z toho cruise',   fmtVolVal(best.crsFuelL)),
+      psCard('z toho klesání',  fmtVolVal(best.descFuelL)),
+    ].join('');
+  })();
+
+  document.getElementById('cruise-badge').textContent =
+    `FL${String(Math.round(cruiseAlt/100)).padStart(2,'0')}0 · MP ${fmtSpdKt(mpCruise.activeTasKt + windKt)} · EC ${fmtSpdKt(ecCruise.activeTasKt + windKt)}`;
+
+  // Pro TOD výpočet používáme EC
+  const crsGS     = ecCruise.crsGS;
+  const crsDistNM = ecCruise.crsDistNM;
+  const crsTimeH  = ecCruise.crsTimeH;
+
+  // ── TOP OF DESCENT ──  pořadí: dist od dep, čas od vzletu, dist do cíle, čas do cíle
+  const todTimeMinsFromDep = tocTimeMins + crsTimeH * 60;
+  const todDistFromDep     = tocDistNM + crsDistNM;
+  const todDistFromDest    = Math.max(0, distNM - todDistFromDep);
+  const todTimeToDestMins  = crsGS > 0 ? (todDistFromDest / crsGS) * 60 : 0;
+
+  document.getElementById('tod-badge').textContent =
+    `${fmtDist(todDistFromDest)} před destination`;
+  document.getElementById('tod-info').innerHTML = [
+    psCard('Vzdálenost od departure', fmtDist(todDistFromDep)),
+    psCard('Čas od vzletu',           fmtMins(todTimeMinsFromDep)),
+    psCard('Vzdálenost do cíle',      fmtDist(todDistFromDest)),
+    psCard('Čas do přistání',         fmtMins(todTimeToDestMins)),
+  ].join('');
+
+  // ── DESCENT PROFILE z CSV ─────────────────────────────────────────────────
+  const descData = plane.desc_data || [];
+  // Segmenty od cruiseAlt dolů k destElev
+  const allDescFromAlts = [12000, 8000, 4000, 2000];
+  let descRows = [], descCumT = 0, descCumD = 0, descCumF = 0;
+
+  for (let i = 0; i < allDescFromAlts.length; i++) {
+    const fromAlt = allDescFromAlts[i];
+    const toAlt   = i + 1 < allDescFromAlts.length ? allDescFromAlts[i+1] : Math.max(destElev + 200, 500);
+    if (fromAlt > cruiseAlt) continue;
+    if (toAlt < destElev)    continue;
+    const toAltClamped = Math.max(toAlt, destElev);
+    const dAlt = fromAlt - toAltClamped;
+    if (dAlt <= 0) continue;
+    // Najdi desc data pro tuto výšku
+    const dRow = descData.find(d => d.alt_ft === fromAlt) || descData.reduce((b, r) => {
+      if (!r.vsi) return b;
+      return (!b || Math.abs(r.alt_ft - fromAlt) < Math.abs(b.alt_ft - fromAlt)) ? r : b;
+    }, null) || {};
+    const vsi    = dRow.vsi     || -500;
+    const tasKmh = dRow.tas_kmh || (ecV * 1.852);
+    const ffLph  = dRow.ff_lph  || ecFF * 0.9;
+    const tasKt  = tasKmh * KMH_TO_KT_PROF;
+    const dtMin  = dAlt / Math.abs(vsi);
+    const dtHr   = dtMin / 60;
+    const gs     = tasKt + windKt;
+    const dDist  = Math.max(0, gs * dtHr);
+    const dFuel  = ffLph * dtHr;
+    descCumT += dtMin; descCumD += dDist; descCumF += dFuel;
+    descRows.push({
+      alt: toAltClamped, vsi: Math.round(vsi), tas: Math.round(tasKt),
+      ff: Math.round(ffLph * 10) / 10,
+      dt: Math.round(dtMin), dd: Math.round(dDist * 10) / 10,
+      cumT: Math.round(descCumT), cumD: Math.round(descCumD * 10) / 10,
+      cumF: Math.round(descCumF * 10) / 10,
+    });
+  }
+
+  const dTbody = document.getElementById('descent-tbody');
+  // Aktualizuj záhlaví descent tabulky dle jednotek
+  const descThead = document.querySelector('#descent-table thead tr');
+  if (descThead) {
+    descThead.innerHTML = `
+      <th>Alt (ft)</th><th>VSI (ft/min)</th><th>TAS (${spdUnit()})</th>
+      <th>FF (${volUnit()}/h)</th><th>Δt (min)</th><th>Δdist (${distUnit()})</th>
+      <th>Kum. čas od TOD (min)</th><th>Kum. dist od TOD (${distUnit()})</th><th>Fuel (${volUnit()})</th>`;
+  }
+  if (descRows.length) {
+    dTbody.innerHTML = descRows.map(s => `
+      <tr>
+        <td class="highlight">${s.alt.toLocaleString('cs-CZ')}</td>
+        <td>${s.vsi}</td>
+        <td>${fmtSpdKt(s.tas)}</td>
+        <td>${fmtFFVal(s.ff)}</td>
+        <td>${s.dt}</td>
+        <td>${fmtDist(s.dd)}</td>
+        <td>${s.cumT}</td>
+        <td>${fmtDist(s.cumD)}</td>
+        <td>${fmtVolVal(s.cumF)}</td>
+      </tr>`).join('');
+  } else {
+    dTbody.innerHTML = '<tr><td colspan="9" style="color:#5a7090;padding:10px;">Data klesání z POH nejsou k dispozici.</td></tr>';
+  }
+
+  // Descent summary – unit-aware
+  const avgDescTasKt = descRows.length ? descRows.reduce((s, r) => s + r.tas, 0) / descRows.length : 0;
+  const descentSummaryEl = document.getElementById('descent-summary');
+  if (descentSummaryEl) {
+    descentSummaryEl.innerHTML = [
+      psCard('Vzdálenost klesání', fmtDist(descCumD)),
+      psCard('Čas klesání',        fmtMins(descCumT)),
+      psCard('Průměrná TAS',       fmtSpdKt(avgDescTasKt)),
+      psCard('Palivo klesání',     fmtVolVal(descCumF)),
+    ].join('');
+  }
+
+  document.getElementById('desc-badge').textContent =
+    `${fmtMins(descCumT)} / ${fmtDist(descCumD)}`;
+
+  // ── FLIGHT SUMMARY ────────────────────────────────────────────────────────
+  const climbTimeH2 = tocTimeMins / 60;
+  const descTimeH2  = descCumT / 60;
+
+  // MP celkové hodnoty
+  const mpTotalTimeH = climbTimeH2 + mpCruise.crsTimeH + descTimeH2;
+  const mpTotalFuelL = tocFuelL + mpCruise.crsFuelL + descCumF;
+
+  // EC celkové hodnoty
+  const ecTotalTimeH = climbTimeH2 + ecCruise.crsTimeH + descTimeH2;
+  const ecTotalFuelL = tocFuelL + ecCruise.crsFuelL + descCumF;
+
+  // Společná část
+  const fsCommon = document.getElementById('fs-common');
+  if (fsCommon) fsCommon.innerHTML = [
+    psCard('Trať',                fmtDist(distNM)),
+    psCard('Hladina cruise',      cruiseAlt.toLocaleString('cs-CZ') + '\u00a0ft'),
+    psCard('Vítr',                (windKt >= 0 ? '+' : '') + Math.round(windKt) + '\u00a0kt'),
+    psCard('Vzdálenost stoupání', fmtDist(tocDistNM)),
+    psCard('Čas stoupání',        fmtMins(tocTimeMins)),
+    psCard('Palivo stoupání',     fmtVolVal(tocFuelL)),
+    psCard('Vzdálenost klesání',  fmtDist(descCumD)),
+    psCard('Čas klesání',         fmtMins(descCumT)),
+    psCard('Palivo klesání',      fmtVolVal(descCumF)),
+  ].join('');
+
+  // MP blok
+  const fsMp = document.getElementById('fs-mp');
+  if (fsMp) fsMp.innerHTML = [
+    psCard('Vzdálenost cruise', fmtDist(mpCruise.crsDistNM)),
+    psCard('Čas cruise',        fmtMins(mpCruise.crsTimeH * 60)),
+    psCard('Palivo cruise',     fmtVolVal(mpCruise.crsFuelL)),
+    psCard('Celkový čas',       fmtMins(mpTotalTimeH * 60)),
+    psCard('Celkové palivo',    fmtVolVal(mpTotalFuelL)),
+  ].join('');
+
+  // EC blok
+  const fsEc = document.getElementById('fs-ec');
+  if (fsEc) fsEc.innerHTML = [
+    psCard('Vzdálenost cruise', fmtDist(ecCruise.crsDistNM)),
+    psCard('Čas cruise',        fmtMins(ecCruise.crsTimeH * 60)),
+    psCard('Palivo cruise',     fmtVolVal(ecCruise.crsFuelL)),
+    psCard('Celkový čas',       fmtMins(ecTotalTimeH * 60)),
+    psCard('Celkové palivo',    fmtVolVal(ecTotalFuelL)),
+  ].join('');
+}
+
+function psCard(label, value) {
+  return `<div class="psm-card"><div class="psm-label">${label}</div><div class="psm-value">${value}</div></div>`;
+}
+function psCpohCard(label, value, altFt) {
+  const sub = altFt !== null ? `<div style="font-size:.7em;color:#5a7090;margin-top:1px;">@ ${Number(altFt).toLocaleString('cs-CZ')} ft</div>` : '';
+  return `<div class="psm-card"><div class="psm-label">${label}</div><div class="psm-value" style="color:#4db8e8">${value}</div>${sub}</div>`;
+}
+
+/* ── Profil letu – unit-aware formátovací helpery ────────────────────── */
+// Vzdálenost NM → km pokud zvoleno
+function fmtDist(nm, dec=1) {
+  if (nm == null || isNaN(nm)) return '–';
+  const du = getDistUnit();
+  const v  = du === 'km' ? nm * 1.852 : nm;
+  const lbl = du === 'km' ? 'km' : 'NM';
+  return (+v.toFixed(dec)).toLocaleString('cs-CZ') + '\u00a0' + lbl;
+}
+// Rychlost kt → km/h pokud zvoleno (pro TAS/GS)
+function fmtSpdKt(kt, dec=0) {
+  if (kt == null || isNaN(kt)) return '–';
+  const su = getSpeedUnit();
+  const v  = su === 'kmh' ? kt * KT_TO_KMH : kt;
+  const lbl = su === 'kmh' ? 'km/h' : 'kt';
+  return Math.round(v).toLocaleString('cs-CZ') + '\u00a0' + lbl;
+}
+// Čas v minutách → "Xh Ymin" nebo jen "Ymin" pokud < 60
+function fmtMins(totalMins) {
+  const m = Math.round(totalMins);
+  if (m < 60) return m + '\u00a0min';
+  const h   = Math.floor(m / 60);
+  const min = m % 60;
+  return min === 0 ? h + '\u00a0h' : h + '\u00a0h\u00a0' + min + '\u00a0min';
+}
+// Hmotnost kg → lb pokud zvoleno
+function fmtWtVal(kg, dec=0) {
+  if (kg == null || isNaN(kg)) return '–';
+  const wu = getWeightUnit();
+  const v  = wu === 'lb' ? kg * KG_TO_LB : kg;
+  const lbl = wu === 'lb' ? 'lb' : 'kg';
+  return Math.round(v).toLocaleString('cs-CZ') + '\u00a0' + lbl;
+}
+// Objem l → USG/IMG pokud zvoleno
+function fmtVolVal(liters, dec=1) {
+  if (liters == null || isNaN(liters)) return '–';
+  const u = getVolumeUnit();
+  let v = liters;
+  let lbl = 'l';
+  if (u === 'usg') { v = liters * L_TO_USG; lbl = 'US gal'; }
+  if (u === 'img') { v = liters * L_TO_IMG; lbl = 'Imp gal'; }
+  return (+v.toFixed(dec)).toLocaleString('cs-CZ') + '\u00a0' + lbl;
+}
+// Spotřeba l/h → USG/h nebo IMG/h
+function fmtFFVal(lph, dec=1) {
+  return fmtVolVal(lph, dec).replace(/\u00a0/, '\u00a0').replace(/(l|US gal|Imp gal)$/, '$1/h');
+}
+// Zkrácené popisky jednotek pro záhlaví tabulky
+function distUnit()   { return getDistUnit() === 'km' ? 'km' : 'NM'; }
+function spdUnit()    { return getSpeedUnit() === 'kmh' ? 'km/h' : 'kt'; }
+function volUnit()    { const u = getVolumeUnit(); return u === 'usg' ? 'US gal' : u === 'img' ? 'Imp gal' : 'l'; }
+function wtUnit()     { return getWeightUnit() === 'lb' ? 'lb' : 'kg'; }
+
+// Přepočet při změně jednotek – znovu renderuje profil letu pokud je vybrané letadlo
+function refreshProfile() {
+  const sel = document.getElementById('profile-plane-select');
+  if (sel && sel.value) calcProfile();
+}
+
 /* ── Render ───────────────────────────────────────────────────────────── */
 function renderTable(planes, currencySymbol) {
   lastPlanes = planes;
@@ -1062,7 +2369,6 @@ function renderTable(planes, currencySymbol) {
     const best_cls     = idx === bestIdx ? ' best-row' : '';
     const typeColor = p.suitable ? '#6fd96f' : '#d06060';
 
-    // Granulární červené označení problematických buněk
     const seatsStyle     = p.fail_seats ? ' style="text-align:center;color:#d06060;font-weight:700"' : ' style="text-align:center"';
     const usefulStyle    = p.fail_load  ? ' style="text-align:right;color:#d06060;font-weight:700"'  : ' style="text-align:right"';
 
@@ -1074,12 +2380,10 @@ function renderTable(planes, currencySymbol) {
     const ecWarn  = ec.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${ec.needed_fuel_l} l">⚠</span>` : '';
     const cmpWarn = cp.range_warning ? `<span class="range-warn" title="Nedostatečný dolet! Potřeba ${cp.needed_fuel_l} l">⚠</span>` : '';
 
-    // Studie
     const dist           = getDistForCalc();
     const noSeats        = p.no_seats || 0;
     const occSeats       = p._occupied_seats || 0;
     const cmpTotal       = cp.total_cost ?? null;
-    // CpOSeat: dělíme min(kapacita letadla, počet cestujících)
     const effectiveSeats = occSeats > 0 ? Math.min(noSeats, occSeats) : 0;
     const cpDis    = (cmpTotal != null && dist > 0)            ? cmpTotal / dist           : null;
     const cpSeat   = (cmpTotal != null && noSeats > 0)         ? cmpTotal / noSeats        : null;
@@ -1143,6 +2447,8 @@ function renderTable(planes, currencySymbol) {
       <td style="text-align:right" class="col-hr">${fmtMoney(hr.plane_cost_ph)}</td>
       <td style="text-align:right" class="col-hr"><strong>${fmtMoney(hr.mp_total_ph)}</strong></td>
       <td style="text-align:right" class="col-hr"><strong>${fmtMoney(hr.ec_total_ph)}</strong></td>
+      <td style="text-align:right" class="col-hr">${hr.mp_total_ph != null ? fmtMoney(hr.mp_total_ph * (parseFloat(document.getElementById('annual_hours')?.value) || 80)) : '–'}</td>
+      <td style="text-align:right" class="col-hr">${hr.ec_total_ph != null ? fmtMoney(hr.ec_total_ph * (parseFloat(document.getElementById('annual_hours')?.value) || 80)) : '–'}</td>
     </tr>`;
   });
 
@@ -1150,8 +2456,6 @@ function renderTable(planes, currencySymbol) {
   updateStickyTop();
   updateFrozenCols();
 
-
-  // Summary
   const total   = filtered.length;
   const ok      = filtered.filter(p => p.suitable).length;
   document.getElementById('sum-count').innerHTML =
@@ -1189,7 +2493,6 @@ const GPH_TO_LPH = 3.78541;
 const WEIGHT_LABELS = { kg: 'kg', lb: 'lb' };
 const VOLUME_LABELS = { l: 'l', usg: 'US gal', img: 'Imp gal' };
 const SPEED_LABELS  = { kt: 'kt', kmh: 'km/h' };
-// Spotřeba/h sdílí label s objemem (litr / US gal / Imp gal)
 const FFPH_LABELS   = { l: 'l', usg: 'US gal', img: 'Imp gal' };
 
 function getWeightUnit() {
@@ -1208,12 +2511,10 @@ function getDistUnit() {
   const c = document.querySelector('input[name="dist_unit"]:checked');
   return c ? c.value : 'nm';
 }
-/** Vrátí vzdálenost z inputu v km (pro výpočet CpDis). */
 function getDistKm() {
   const nm = parseFloat(document.getElementById('distance_nm')?.value) || 0;
   return nm * 1.852;
 }
-/** Vzdálenost v zvolené jednotce (pro zobrazení v záhlaví). */
 function getDistForCalc() {
   const nm = parseFloat(document.getElementById('distance_nm')?.value) || 0;
   return getDistUnit() === 'km' ? nm * 1.852 : nm;
@@ -1231,7 +2532,6 @@ function convertVol(liters) {
   return liters;
 }
 function convertFfph(lph) {
-  // spotřeba/h: backend vždy posílá l/h, převádíme stejně jako objem
   return convertVol(lph);
 }
 
@@ -1271,17 +2571,20 @@ document.querySelectorAll('input[name="weight_unit"], input[name="volume_unit"]'
     updateUnitHeaders();
     if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
     refreshHangarHeaders();
+    refreshProfile();
   }));
 document.querySelectorAll('input[name="speed_unit"]')
   .forEach(r => r.addEventListener('change', () => {
     updateUnitHeaders();
     if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
     refreshHangarHeaders();
+    refreshProfile();
   }));
 document.querySelectorAll('input[name="dist_unit"]')
   .forEach(r => r.addEventListener('change', () => {
     updateUnitHeaders();
     if (lastPlanes.length) renderTable(lastPlanes, currentCurrencySymbol);
+    refreshProfile();
   }));
 updateUnitHeaders();
 
@@ -1306,7 +2609,6 @@ document.querySelectorAll('input[name="currency"]').forEach(radio => {
 });
 window.updateCurrencyFields();
 
-/* ── Přepočet při změně kurzu ─────────────────────────────────────────── */
 let _rateDebounce = null;
 document.querySelectorAll('.rate-input').forEach(input => {
   input.addEventListener('input', () => {
@@ -1317,7 +2619,6 @@ document.querySelectorAll('.rate-input').forEach(input => {
   });
 });
 
-/* ── Přepočet při změně polí v Plánu ─────────────────────────────────── */
 let _planDebounce = null;
 document.querySelectorAll('#tab-plan input').forEach(input => {
   input.addEventListener('input', () => {
@@ -1329,6 +2630,36 @@ document.querySelectorAll('#tab-plan input').forEach(input => {
 });
 
 /* ── Collect params ───────────────────────────────────────────────────── */
+/* ── Extra fuel – show/hide pole hodnoty + update jednotky ───────────── */
+(function initExtraFuel() {
+  const UNIT_LABELS = { none: '', absolute: 'l', percent: '%', time: 'min' };
+
+  function update() {
+    const type  = document.querySelector('input[name="extra_fuel_type"]:checked')?.value || 'none';
+    const wrap  = document.getElementById('extra-fuel-value-wrap');
+    const label = document.getElementById('extra-fuel-unit-label');
+    if (wrap)  wrap.style.display  = type === 'none' ? 'none' : 'flex';
+    if (label) label.textContent   = UNIT_LABELS[type] || '';
+    // Pokud se změnilo nastavení, přepočítej
+    if (typeof doCompute === 'function' && typeof lastPlanes !== 'undefined' && lastPlanes.length) {
+      doCompute();
+    }
+  }
+
+  document.querySelectorAll('input[name="extra_fuel_type"]').forEach(r => {
+    r.addEventListener('change', update);
+  });
+  const valInput = document.getElementById('extra_fuel_value');
+  if (valInput) {
+    let _t = null;
+    valInput.addEventListener('input', () => {
+      clearTimeout(_t);
+      _t = setTimeout(() => { if (typeof doCompute === 'function') doCompute(); }, 600);
+    });
+  }
+  update();
+})();
+
 function collectParams() {
   const numIds = [
     'avgas_price','jet_a1_price','avgas_density','jet_a1_density',
@@ -1338,15 +2669,17 @@ function collectParams() {
     'pax1_weight','pax1_baggage','pax2_weight','pax2_baggage',
     'pax3_weight','pax3_baggage','pax4_weight','pax4_baggage',
     'pax5_weight','pax5_baggage','pax6_weight','pax6_baggage',
+    'extra_fuel_value',
   ];
   const p = {};
   numIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) p[id] = parseFloat(el.value) || 0;
   });
-  p['currency']    = getSelectedCurrency();
-  p['weight_unit'] = getWeightUnit();
-  p['volume_unit'] = getVolumeUnit();
+  p['currency']         = getSelectedCurrency();
+  p['weight_unit']      = getWeightUnit();
+  p['volume_unit']      = getVolumeUnit();
+  p['extra_fuel_type']  = document.querySelector('input[name="extra_fuel_type"]:checked')?.value || 'none';
   return p;
 }
 
@@ -1362,12 +2695,11 @@ async function doCompute() {
     });
     const data = await resp.json();
     if (data.ok) {
-      // Přidáme occupied_seats do každého letadla pro výpočet CpOSeat
       if (data.occupied_seats != null) {
         data.planes.forEach(p => { p._occupied_seats = data.occupied_seats; });
       }
       renderTable(data.planes, data.currency_symbol);
-      // Potvrzení payload badge hodnotou ověřenou serverem
+      populatePlaneSelect();
       const payloadEl    = document.getElementById('payload-display');
       const payloadValEl = document.getElementById('payload-value');
       if (payloadEl && payloadValEl && data.total_pax_kg != null) {
@@ -1392,7 +2724,6 @@ async function doCompute() {
 document.getElementById('btn-compute').addEventListener('click', doCompute);
 
 /* ── Hangár ───────────────────────────────────────────────────────────── */
-// HG_GROUPS se generuje dynamicky, aby záhlaví skupin odrážela zvolené jednotky
 function getHgGroups() {
   const wu    = WEIGHT_LABELS[getWeightUnit()] || 'kg';
   const vu    = VOLUME_LABELS[getVolumeUnit()] || 'l';
@@ -1413,7 +2744,6 @@ function getHgGroups() {
   ];
 }
 
-// Hezčí zkrácené popisky sloupců
 const HG_LABELS = {
   'type': 'Typ', 'Manufacturer': 'Výrobce', 'Designation': 'Model', 'Name': 'Název',
   'No. Seats': 'Sedadel', 'Gear Type': 'Podvozek', 'Fuel type': 'Palivo',
@@ -1431,82 +2761,48 @@ const HG_LABELS = {
   'Fixed cost [CZK/yr]': 'Fixní', 'Variable cost [CZK/yr]': 'Variabilní',
 };
 
-// Tooltip texty zobrazené po najetí myší na záhlaví sloupce
 const HG_TOOLTIPS = {
-  'type': 'Typ letadla (SEP / MEP)',
-  'Manufacturer': 'Výrobce letadla',
-  'Designation': 'Typové označení',
-  'Name': 'Obchodní název',
-  'No. Seats': 'Počet sedadel včetně pilota',
-  'Gear Type': 'Typ podvozku (pevný / zatažitelný)',
-  'Fuel type': 'Typ paliva (AVGAS 100LL / Jet-A1)',
-  'Wingspan [m]': 'Rozpětí křídel [m]',
-  'Length [m]': 'Délka trupu [m]',
-  'Height [m]': 'Výška letadla [m]',
+  'type': 'Typ letadla (SEP / MEP)', 'Manufacturer': 'Výrobce letadla',
+  'Designation': 'Typové označení', 'Name': 'Obchodní název',
+  'No. Seats': 'Počet sedadel včetně pilota', 'Gear Type': 'Typ podvozku',
+  'Fuel type': 'Typ paliva', 'Wingspan [m]': 'Rozpětí křídel [m]',
+  'Length [m]': 'Délka trupu [m]', 'Height [m]': 'Výška letadla [m]',
   'Empty Weight [kg]': 'Prázdná hmotnost letadla',
-  'MTOW [kg]': 'Maximum Take-Off Weight – maximální vzletová hmotnost',
-  'Useful Load [kg]': 'Užitečná zátěž = MTOW − prázdná hmotnost',
+  'MTOW [kg]': 'Maximum Take-Off Weight', 'Useful Load [kg]': 'Užitečná zátěž',
   'Fuel Capacity [l]': 'Kapacita palivových nádrží',
-  'Engine Manufacturer': 'Výrobce motoru',
-  'Engine type': 'Typ / označení motoru',
-  'No. pistons': 'Počet válců motoru',
-  'Engine power [HP]': 'Výkon motoru v koních (HP)',
-  'Engine power [kW]': 'Výkon motoru v kilowattech (kW)',
-  'Vcruise_75 [km/h]': 'Cestovní rychlost při 75% výkonu',
-  'Vcruise_65 [km/h]': 'Cestovní rychlost při 65% výkonu',
-  'Vcruise_55 [km/h]': 'Cestovní rychlost při 55% výkonu (economy)',
-  'Vs0 [km/h]': 'Vs0 – Pádová rychlost s vysunutými klapkami (přistávací konfigurace)',
-  'Vs1 [km/h]': 'Vs1 – Pádová rychlost v čisté konfiguraci (bez klapek)',
-  'Vx [km/h]': 'Vx – Rychlost nejlepšího úhlu stoupání (největší výška na nejkratší vzdálenost)',
-  'Vy [km/h]': 'Vy – Rychlost nejlepší rychlosti stoupání (největší výška za jednotku času)',
-  'Vno [km/h]': 'Vno – Maximální rychlost v normálním provozu (plynulý vzduch)',
-  'Vne [km/h]': 'Vne – Nikdy nepřekračovatelná rychlost',
-  'FF_75 [l/h]': 'Spotřeba paliva při 75% výkonu [l/h]',
-  'FF_55 [l/h]': 'Spotřeba paliva při 55% výkonu (economy) [l/h]',
-  'Range_MP [km]': 'Dolet při maximálním výkonu (75%)',
-  'Range_EC [km]': 'Dolet při ekonomickém cestování (55%)',
-  'Fixed cost [CZK/yr]': 'Roční fixní náklady (pojištění, hangár, údržba…)',
-  'Variable cost [CZK/yr]': 'Roční variabilní náklady (revize, přistání…)',
+  'Engine Manufacturer': 'Výrobce motoru', 'Engine type': 'Typ motoru',
+  'No. pistons': 'Počet válců', 'Engine power [HP]': 'Výkon [HP]',
+  'Engine power [kW]': 'Výkon [kW]',
+  'Vcruise_75 [km/h]': '75% výkon', 'Vcruise_65 [km/h]': '65% výkon',
+  'Vcruise_55 [km/h]': '55% výkon (economy)',
+  'Vs0 [km/h]': 'Pádová s klapkami', 'Vs1 [km/h]': 'Pádová bez klapek',
+  'Vx [km/h]': 'Nejlepší úhel stoupání', 'Vy [km/h]': 'Nejlepší rychlost stoupání',
+  'Vno [km/h]': 'Max v normálním provozu', 'Vne [km/h]': 'Nikdy nepřekračovat',
+  'FF_75 [l/h]': 'Spotřeba 75%', 'FF_55 [l/h]': 'Spotřeba 55%',
+  'Range_MP [km]': 'Dolet max power', 'Range_EC [km]': 'Dolet economy',
+  'Fixed cost [CZK/yr]': 'Roční fixní náklady',
+  'Variable cost [CZK/yr]': 'Roční variabilní náklady',
 };
 
-// Sloupce obsahující hmotnosti v kg (ze CSV – základní jednotka)
-const HG_WEIGHT_KEYS = new Set(['Empty Weight [kg]','MTOW [kg]','Useful Load [kg]']);
-// Rychlosti v km/h (ze CSV – základní jednotka)
+const HG_WEIGHT_KEYS   = new Set(['Empty Weight [kg]','MTOW [kg]','Useful Load [kg]']);
 const HG_SPEED_KMH_KEYS = new Set(['Vcruise_75 [km/h]','Vcruise_65 [km/h]','Vcruise_55 [km/h]',
   'Vs0 [km/h]','Vs1 [km/h]','Vx [km/h]','Vy [km/h]','Vno [km/h]','Vne [km/h]']);
-// Dolet v km (ze CSV – základní jednotka)
-const HG_DIST_KM_KEYS = new Set(['Range_MP [km]','Range_EC [km]']);
-// Spotřeba v l/h (ze CSV – základní jednotka)
-const HG_LPH_KEYS = new Set(['FF_75 [l/h]','FF_55 [l/h]']);
-// Kapacita nádrže v litrech (ze CSV)
-const HG_VOL_L_KEYS = new Set(['Fuel Capacity [l]']);
+const HG_DIST_KM_KEYS  = new Set(['Range_MP [km]','Range_EC [km]']);
+const HG_LPH_KEYS      = new Set(['FF_75 [l/h]','FF_55 [l/h]']);
+const HG_VOL_L_KEYS    = new Set(['Fuel Capacity [l]']);
 
-let hgData = [];      // všechna data z API (řádky)
-let hgCols = [];      // zobrazené sloupce
-let hgSortCol = null;
-let hgSortAsc = true;
-let hgFilteredData = [];
+let hgData = [], hgCols = [], hgSortCol = null, hgSortAsc = true, hgFilteredData = [];
 
-/**
- * Nové CSV má jediný sloupec 'Fuel Capacity [l]' – žádné remapování není potřeba.
- * Funkce zůstává pro zpětnou kompatibilitu, ale projde beze změny.
- */
-function remapFuelCols(cols, rows) {
-  return { cols, rows };
-}
+function remapFuelCols(cols, rows) { return { cols, rows }; }
 
 function hgFmt(v, key) {
   if (v === null || v === undefined) return '–';
   const n = typeof v === 'number' ? v : parseFloat(v);
   if (isNaN(n)) return String(v);
-
-  // Hmotnosti: kg → lb pokud zvoleno
   if (HG_WEIGHT_KEYS.has(key)) {
     const conv = getWeightUnit() === 'lb' ? n * KG_TO_LB : n;
     return Math.round(conv).toLocaleString('cs-CZ');
   }
-
-  // Kapacita nádrže v litrech → převod na zvolený objem
   if (HG_VOL_L_KEYS.has(key)) {
     const u = getVolumeUnit();
     let conv = n;
@@ -1514,20 +2810,14 @@ function hgFmt(v, key) {
     else if (u === 'img') conv = n * L_TO_IMG;
     return (+conv.toFixed(1)).toLocaleString('cs-CZ');
   }
-
-  // Rychlosti v km/h → kt pokud zvoleno
   if (HG_SPEED_KMH_KEYS.has(key)) {
     const conv = getSpeedUnit() === 'kt' ? n / KT_TO_KMH : n;
     return Math.round(conv).toLocaleString('cs-CZ');
   }
-
-  // Dolet v km → NM pokud zvoleno
   if (HG_DIST_KM_KEYS.has(key)) {
     const conv = getDistUnit() === 'nm' ? n / NM_TO_KM : n;
     return Math.round(conv).toLocaleString('cs-CZ');
   }
-
-  // Spotřeba l/h → převod na zvolený objem/h
   if (HG_LPH_KEYS.has(key)) {
     const u = getVolumeUnit();
     let conv = n;
@@ -1535,14 +2825,9 @@ function hgFmt(v, key) {
     else if (u === 'img') conv = n * L_TO_IMG;
     return (+conv.toFixed(1)).toLocaleString('cs-CZ');
   }
-
-
-  // Ostatní čísla
-  return Number.isInteger(n) ? n.toLocaleString('cs-CZ')
-                              : (+n.toFixed(2)).toLocaleString('cs-CZ');
+  return Number.isInteger(n) ? n.toLocaleString('cs-CZ') : (+n.toFixed(2)).toLocaleString('cs-CZ');
 }
 
-/** Překreslí záhlaví hangár tabulky (skupiny + sloupce) při změně jednotek. */
 function refreshHangarHeaders() {
   if (!hgCols.length) return;
   const thead = document.getElementById('hangar-thead');
@@ -1556,13 +2841,11 @@ function renderHangarTable() {
     ? hgData.filter(r => Object.values(r).some(v => v !== null && String(v).toLowerCase().includes(search)))
     : [...hgData];
 
-  // Řazení
   if (hgSortCol !== null) {
     hgFilteredData.sort((a, b) => {
       const va = a[hgSortCol], vb = b[hgSortCol];
       if (va === null && vb === null) return 0;
-      if (va === null) return 1;
-      if (vb === null) return -1;
+      if (va === null) return 1; if (vb === null) return -1;
       if (typeof va === 'number' && typeof vb === 'number') return hgSortAsc ? va - vb : vb - va;
       return hgSortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
     });
@@ -1571,10 +2854,8 @@ function renderHangarTable() {
   const HG_GROUPS = getHgGroups();
   const sepKeys = new Set(HG_GROUPS.map(g => g.keys[0]));
 
-  // Záhlaví – sestavíme vždy pokud thead prázdný (refreshHangarHeaders ho vyprázdní)
   const thead = document.getElementById('hangar-thead');
   if (!thead.hasChildNodes()) {
-    // Řádek skupin
     const groupRow = document.createElement('tr');
     groupRow.className = 'hg-group';
     HG_GROUPS.forEach((g, gi) => {
@@ -1588,7 +2869,6 @@ function renderHangarTable() {
     });
     thead.appendChild(groupRow);
 
-    // Řádek sloupců
     const colRow = document.createElement('tr');
     hgCols.forEach(key => {
       const th = document.createElement('th');
@@ -1619,7 +2899,6 @@ function renderHangarTable() {
     });
   }
 
-  // Tělo tabulky
   const tbody = document.getElementById('hangar-tbody');
   if (!hgFilteredData.length) {
     tbody.innerHTML = '<tr><td colspan="99" style="padding:16px;text-align:center;color:#5a6880;">Žádná letadla nevyhovují filtru.</td></tr>';
@@ -1643,7 +2922,6 @@ async function loadHangar() {
     const resp = await fetch('/api/hangar');
     const data = await resp.json();
     if (!data.ok) throw new Error(data.error);
-    // Přemapujeme dva fuel sloupce na jeden virtuální __fuel_cap
     const mapped = remapFuelCols(data.columns, data.rows);
     hgData = mapped.rows;
     hgCols = mapped.cols;
@@ -1654,7 +2932,6 @@ async function loadHangar() {
 }
 
 document.getElementById('hangar-search').addEventListener('input', renderHangarTable);
-
 
 // Auto-compute on load
 doCompute();

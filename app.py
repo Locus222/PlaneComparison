@@ -84,6 +84,10 @@ def compute(params: dict) -> list:
     seat_weight      = person_weight + baggage_per_seat
     annual_hours     = max(float(params.get('annual_hours', 80)), 1.0)  # min 1 h/rok
 
+    # --- extra fuel ---
+    extra_fuel_type  = str(params.get('extra_fuel_type',  'none')).lower()   # none|absolute|percent|time
+    extra_fuel_value = float(params.get('extra_fuel_value', 0.0))
+
     # --- měna ---
     currency = str(params.get('currency', 'CZK')).upper()
     if currency not in CURRENCY_SYMBOLS:
@@ -190,17 +194,20 @@ def compute(params: dict) -> list:
             Výpočet pro jeden výkonnostní režim.
 
             Definice (weight_balance_rules.md):
-              payload    = součet osádky + zavazadla  (total_pax_kg – pevná hodnota)
-              trip_fuel  = palivo na let A→B
-              reserve    = palivo na fuel_reserve_min minut (při daném FF)
-              FOB        = trip_fuel + reserve
-              trip_load  = FOB [kg] + payload [kg]
-              podmínka   : useful_load >= trip_load
+              payload          = součet osádky + zavazadla
+              trip_fuel        = palivo na let A→B
+              reserve_fuel     = fuel_reserve_min minut při daném FF
+              contingency_fuel = 5 % trip_fuel
+              extra_fuel       = dle nastavení (absolutní/procento/čas)
+              FOB  = trip_fuel + reserve_fuel + contingency_fuel + extra_fuel
+              trip_load = FOB [kg] + payload [kg]
+              podmínka  : useful_load >= trip_load
             """
             out = {}
             if any(pd.isna(x) for x in [v_kt, ff_gph, distance_nm]):
                 for k in ['v_kt', 'v_kmh', 'ff_gph', 'ff_lph', 'flight_time_h',
-                          'flight_time_fmt', 'trip_fuel_l', 'fob_l',
+                          'flight_time_fmt', 'trip_fuel_l', 'reserve_fuel_l',
+                          'contingency_fuel_l', 'extra_fuel_l', 'fob_l',
                           'fuel_cost', 'plane_cost', 'total_cost',
                           'stops', 'leg_nm', 'total_time_h', 'total_time_fmt',
                           'trip_load_kg', 'load_reserve_kg', 'range_warning', 'needed_fuel_l']:
@@ -211,10 +218,22 @@ def compute(params: dict) -> list:
             ff_lph        = ff_gph * GAL_TO_L
             flight_time_h = distance_nm / gs_kt
 
-            # ── Trip fuel & FOB ───────────────────────────────────────────
-            trip_fuel_l = ff_lph * flight_time_h          # palivo na let A→B [l]
-            reserve_l   = ff_lph * (fuel_reserve_min / 60.0)  # rezerva [l]
-            fob_l       = round(trip_fuel_l + reserve_l, 1)   # Fuel On Board [l]
+            # ── FOB = trip + reserve + contingency + extra ────────────────
+            trip_fuel_l        = ff_lph * flight_time_h
+            reserve_l          = ff_lph * (fuel_reserve_min / 60.0)
+            contingency_fuel_l = trip_fuel_l * 0.05          # 5 % trip fuel
+
+            # Extra fuel dle nastavení
+            if extra_fuel_type == 'absolute':
+                extra_l = max(0.0, extra_fuel_value)
+            elif extra_fuel_type == 'percent':
+                extra_l = trip_fuel_l * max(0.0, extra_fuel_value) / 100.0
+            elif extra_fuel_type == 'time':
+                extra_l = (max(0.0, extra_fuel_value) / 60.0) * ff_lph
+            else:
+                extra_l = 0.0
+
+            fob_l = round(trip_fuel_l + reserve_l + contingency_fuel_l + extra_l, 1)
 
             # ── Trip Load = FOB [kg] + Payload [kg] ──────────────────────
             fob_kg        = fob_l * density
@@ -223,7 +242,7 @@ def compute(params: dict) -> list:
             # ── Load Reserve = Useful Load − Trip Load ────────────────────
             load_reserve_kg = round(float(useful_load) - trip_load_kg, 1) if pd.notna(useful_load) else None
 
-            # ── Náklady ───────────────────────────────────────────────────
+            # ── Náklady (pouze trip_fuel – extra/contingency jsou neproduktivní palivo) ─
             fuel_cost_czk  = trip_fuel_l * fuel_price
             plane_cost_czk = (cost_ph * flight_time_h) if pd.notna(cost_ph) else None
             total_cost_czk = (fuel_cost_czk + plane_cost_czk) if plane_cost_czk is not None else None
@@ -250,25 +269,28 @@ def compute(params: dict) -> list:
             total_time_h = flight_time_h + stops * (45 / 60.0)
 
             out.update({
-                'v_kt':            round(v_kt, 0),
-                'v_kmh':           round(v_kt * KT_TO_KPH, 0),
-                'ff_gph':          round(ff_gph, 1),
-                'ff_lph':          round(ff_lph, 1),
-                'flight_time_h':   round(flight_time_h, 3),
-                'flight_time_fmt': fmt_hm(flight_time_h),
-                'trip_fuel_l':     round(trip_fuel_l, 1),
-                'fob_l':           fob_l,
-                'trip_load_kg':    trip_load_kg,
-                'load_reserve_kg': load_reserve_kg,
-                'fuel_cost':       fuel_cost,
-                'plane_cost':      plane_cost,
-                'total_cost':      total_cost,
-                'range_warning':   range_warning,
-                'needed_fuel_l':   round(fob_l, 1),   # alias – kolik FOB je potřeba
-                'stops':           stops,
-                'leg_nm':          leg_nm,
-                'total_time_h':    round(total_time_h, 3),
-                'total_time_fmt':  fmt_hm(total_time_h),
+                'v_kt':               round(v_kt, 0),
+                'v_kmh':              round(v_kt * KT_TO_KPH, 0),
+                'ff_gph':             round(ff_gph, 1),
+                'ff_lph':             round(ff_lph, 1),
+                'flight_time_h':      round(flight_time_h, 3),
+                'flight_time_fmt':    fmt_hm(flight_time_h),
+                'trip_fuel_l':        round(trip_fuel_l, 1),
+                'reserve_fuel_l':     round(reserve_l, 1),
+                'contingency_fuel_l': round(contingency_fuel_l, 1),
+                'extra_fuel_l':       round(extra_l, 1),
+                'fob_l':              fob_l,
+                'trip_load_kg':       trip_load_kg,
+                'load_reserve_kg':    load_reserve_kg,
+                'fuel_cost':          fuel_cost,
+                'plane_cost':         plane_cost,
+                'total_cost':         total_cost,
+                'range_warning':      range_warning,
+                'needed_fuel_l':      round(fob_l, 1),
+                'stops':              stops,
+                'leg_nm':             leg_nm,
+                'total_time_h':       round(total_time_h, 3),
+                'total_time_fmt':     fmt_hm(total_time_h),
             })
             return out
 
@@ -346,6 +368,64 @@ def compute(params: dict) -> list:
         r['weight_unit']        = weight_unit
         r['volume_unit']        = volume_unit
         r['cruise_altitude_ft'] = int(cruise_altitude_ft)
+
+        # ── Climb data z CSV ────────────────────────────────────────────────
+        climb_levels = [0, 4000, 8000, 12000]
+        climb_data = []
+        for lvl in climb_levels:
+            roc_col  = f'Climb_ROC_{lvl}ft [ft/min]'
+            ff_col   = f'Climb_FF_{lvl}ft [l/h]'
+            time_col = f'Climb_Time_{lvl}ft [min]'
+            roc  = pd.to_numeric(row.get(roc_col),  errors='coerce')
+            ff_l = pd.to_numeric(row.get(ff_col),   errors='coerce')
+            t    = pd.to_numeric(row.get(time_col), errors='coerce')
+            climb_data.append({
+                'alt_ft': lvl,
+                'roc':    float(roc)  if pd.notna(roc)  else None,
+                'ff_lph': float(ff_l) if pd.notna(ff_l) else None,
+                'cum_time_min': float(t) if pd.notna(t) else None,
+            })
+        r['climb_data'] = climb_data
+
+        # Cruise climb speed from CSV (km/h -> kt)
+        cc_kmh = pd.to_numeric(row.get('Cruise climb [km/h]'), errors='coerce')
+        r['cruise_climb_kmh'] = float(cc_kmh) if pd.notna(cc_kmh) else None
+        r['cruise_climb_kt']  = round(float(cc_kmh) / KT_TO_KPH, 1) if pd.notna(cc_kmh) else None
+
+        # ── Descent data z CSV ──────────────────────────────────────────────
+        desc_levels = [12000, 8000, 4000, 2000]
+        desc_data = []
+        for lvl in desc_levels:
+            vsi_col = f'Desc_VSI_{lvl}ft [ft/min]'
+            tas_col = f'Desc_TAS_{lvl}ft [km/h]'
+            ff_col  = f'Desc_FF_{lvl}ft [l/h]'
+            vsi  = pd.to_numeric(row.get(vsi_col), errors='coerce')
+            tas  = pd.to_numeric(row.get(tas_col), errors='coerce')
+            ff_l = pd.to_numeric(row.get(ff_col),  errors='coerce')
+            desc_data.append({
+                'alt_ft': lvl,
+                'vsi':    float(vsi)  if pd.notna(vsi)  else None,
+                'tas_kmh':float(tas)  if pd.notna(tas)  else None,
+                'ff_lph': float(ff_l) if pd.notna(ff_l) else None,
+            })
+        r['desc_data'] = desc_data
+
+        # ── Cruise data z CSV (per altitude) ───────────────────────────────
+        cruise_alt_levels = [4000, 8000, 12000]
+        cruise_poh = []
+        for lvl in cruise_alt_levels:
+            mp_tas = pd.to_numeric(row.get(f'Cruise_MP_TAS_{lvl}ft [km/h]'),  errors='coerce')
+            mp_ff  = pd.to_numeric(row.get(f'Cruise_MP_FF_{lvl}ft [l/h]'),    errors='coerce')
+            ec_tas = pd.to_numeric(row.get(f'Cruise_EC_TAS_{lvl}ft [km/h]'),  errors='coerce')
+            ec_ff  = pd.to_numeric(row.get(f'Cruise_EC_FF_{lvl}ft [l/h]'),    errors='coerce')
+            cruise_poh.append({
+                'alt_ft':  lvl,
+                'mp_tas_kmh': float(mp_tas) if pd.notna(mp_tas) else None,
+                'mp_ff_lph':  float(mp_ff)  if pd.notna(mp_ff)  else None,
+                'ec_tas_kmh': float(ec_tas) if pd.notna(ec_tas) else None,
+                'ec_ff_lph':  float(ec_ff)  if pd.notna(ec_ff)  else None,
+            })
+        r['cruise_poh'] = cruise_poh
 
         results.append(r)
 
