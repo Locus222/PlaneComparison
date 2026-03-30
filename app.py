@@ -20,16 +20,12 @@ CSV_PATH = os.path.join(BASE_DIR, 'plane_table.csv')
 
 def load_planes() -> pd.DataFrame:
     df = pd.read_csv(CSV_PATH, header=0, dtype=str)
-    df.rename(columns={
-        'lenth [m]':          'length [m]',
-        'toal cost per hour': 'total cost per hour',
-    }, inplace=True)
     numeric_cols = [
-        'Empty Weight [kg]', 'MTOW [kg]', 'Usefull Load [kg]', 'No. Seats',
-        'Fuel Capacity [liters]', 'Fuel Capacity [gal US]',
-        'Vcruise 75%', 'Vcruise 65%', 'Vcruise 55%', 'Vcruise 45%',
-        'FuelFlow_75_gph', 'FuelFlow_65_gph', 'FuelFlow_55_gph', 'FuelFlow_45_gp',
-        'Fixed cost 80h/y [CZK]', 'Variable cost 80h/y [CZK]',
+        'Empty Weight [kg]', 'MTOW [kg]', 'Useful Load [kg]', 'No. Seats',
+        'Fuel Capacity [l]',
+        'Vcruise_75 [km/h]', 'Vcruise_65 [km/h]', 'Vcruise_55 [km/h]', 'Vcruise_45 [km/h]',
+        'FF_75 [l/h]', 'FF_65 [l/h]', 'FF_55 [l/h]', 'FF_45 [l/h]',
+        'Fixed cost [CZK/yr]', 'Variable cost [CZK/yr]',
     ]
     for c in numeric_cols:
         if c in df.columns:
@@ -140,26 +136,38 @@ def compute(params: dict) -> list:
             'no_seats':     int(row['No. Seats']) if pd.notna(row.get('No. Seats')) else 0,
             'empty_weight': row.get('Empty Weight [kg]', ''),
             'mtow':         row.get('MTOW [kg]', ''),
-            'useful_load':  row.get('Usefull Load [kg]', ''),
+            'useful_load':  row.get('Useful Load [kg]', ''),
             'fuel_type':    row.get('Fuel type', 'AVGAS 100LL'),
         }
 
-        useful_load = pd.to_numeric(row.get('Usefull Load [kg]'), errors='coerce')
+        useful_load = pd.to_numeric(row.get('Useful Load [kg]'),   errors='coerce')
         mtow        = pd.to_numeric(row.get('MTOW [kg]'),          errors='coerce')
         empty_wt    = pd.to_numeric(row.get('Empty Weight [kg]'),  errors='coerce')
         no_seats    = pd.to_numeric(row.get('No. Seats'),          errors='coerce')
-        fuel_cap_l  = pd.to_numeric(row.get('Fuel Capacity [liters]'), errors='coerce')
+        fuel_cap_l  = pd.to_numeric(row.get('Fuel Capacity [l]'),  errors='coerce')
 
         r['fuel_cap_l'] = float(fuel_cap_l) if pd.notna(fuel_cap_l) else None
-        v75         = pd.to_numeric(row.get('Vcruise 75%'),     errors='coerce')
-        v55         = pd.to_numeric(row.get('Vcruise 55%'),     errors='coerce')
-        ff75_gph    = pd.to_numeric(row.get('FuelFlow_75_gph'), errors='coerce')
-        ff55_gph    = pd.to_numeric(row.get('FuelFlow_55_gph'), errors='coerce')
+
+        # CSV ukládá rychlosti v km/h, spotřebu v l/h → převedeme zpět na kt/GPH pro interní výpočty
+        KMH_TO_KT  = 1.0 / KT_TO_KPH
+        LPH_TO_GPH = 1.0 / GAL_TO_L
+
+        v75_kmh     = pd.to_numeric(row.get('Vcruise_75 [km/h]'), errors='coerce')
+        v55_kmh     = pd.to_numeric(row.get('Vcruise_55 [km/h]'), errors='coerce')
+        ff75_lph    = pd.to_numeric(row.get('FF_75 [l/h]'),       errors='coerce')
+        ff55_lph    = pd.to_numeric(row.get('FF_55 [l/h]'),       errors='coerce')
+
+        # Interní výpočty pracují v kt a GPH (historicky), převedeme
+        v75      = v75_kmh  * KMH_TO_KT  if pd.notna(v75_kmh)  else float('nan')
+        v55      = v55_kmh  * KMH_TO_KT  if pd.notna(v55_kmh)  else float('nan')
+        ff75_gph = ff75_lph * LPH_TO_GPH if pd.notna(ff75_lph) else float('nan')
+        ff55_gph = ff55_lph * LPH_TO_GPH if pd.notna(ff55_lph) else float('nan')
+
         fuel_type   = str(row.get('Fuel type', 'AVGAS 100LL'))
 
         # ── Náklady letadla: fixní + variabilní / nalétané hodiny ────────
-        fixed_cost_czk    = pd.to_numeric(row.get('Fixed cost 80h/y [CZK]'),    errors='coerce')
-        variable_cost_czk = pd.to_numeric(row.get('Variable cost 80h/y [CZK]'), errors='coerce')
+        fixed_cost_czk    = pd.to_numeric(row.get('Fixed cost [CZK/yr]'),    errors='coerce')
+        variable_cost_czk = pd.to_numeric(row.get('Variable cost [CZK/yr]'), errors='coerce')
         # cost_ph = roční náklady (bez paliva) přepočítané na 1 h dle zadaného annual_hours
         if pd.notna(fixed_cost_czk) and pd.notna(variable_cost_czk):
             cost_ph = (float(fixed_cost_czk) + float(variable_cost_czk)) / annual_hours
@@ -390,32 +398,32 @@ def api_hangar():
     """Vrátí surová data z plane_table.csv pro záložku Hangár."""
     try:
         df = load_planes()
-        # Vybrané sloupce pro zobrazení – v pořadí skupin
+        # Vybrané sloupce pro zobrazení – v pořadí skupin (nová struktura CSV)
         cols = [
             # Identifikace
             'type', 'Manufacturer', 'Designation', 'Name',
             # Konfigurace
             'No. Seats', 'Gear Type', 'Fuel type',
             # Rozměry
-            'wingspan [m]', 'length [m]', 'height [m]',
+            'Wingspan [m]', 'Length [m]', 'Height [m]',
             # Hmotnosti
-            'Empty Weight [kg]', 'MTOW [kg]', 'Usefull Load [kg]',
+            'Empty Weight [kg]', 'MTOW [kg]', 'Useful Load [kg]',
             # Nádrž
-            'Fuel Capacity [liters]', 'Fuel Capacity [gal US]',
+            'Fuel Capacity [l]',
             # Motor
             'Engine Manufacturer', 'Engine type', 'No. pistons',
             'Engine power [HP]', 'Engine power [kW]',
-            # Rychlosti (kt)
-            'Vcruise 75%', 'Vcruise 65%', 'Vcruise 55%',
-            'Stall Speed Vs0 (FF)', 'Vs1 – Stall speed (clean)',
-            'Vx – Best angle of climb speed', 'Vy – Best rate of climb speed',
-            'Vno – Normal operating speed', 'Vne – Never exceed speed',
-            # Dolet
-            'Range max power [NM]', 'Range economy cruise[NM]',
-            # Spotřeba (gph)
-            'FuelFlow_75_gph', 'FuelFlow_55_gph',
+            # Rychlosti (km/h – nová základní jednotka)
+            'Vcruise_75 [km/h]', 'Vcruise_65 [km/h]', 'Vcruise_55 [km/h]',
+            'Vs0 [km/h]', 'Vs1 [km/h]',
+            'Vx [km/h]', 'Vy [km/h]',
+            'Vno [km/h]', 'Vne [km/h]',
+            # Spotřeba (l/h)
+            'FF_75 [l/h]', 'FF_55 [l/h]',
+            # Dolet (km)
+            'Range_MP [km]', 'Range_EC [km]',
             # Náklady
-            'Fixed cost 80h/y [CZK]', 'Variable cost 80h/y [CZK]',
+            'Fixed cost [CZK/yr]', 'Variable cost [CZK/yr]',
         ]
         present = [c for c in cols if c in df.columns]
         sub = df[present].copy()

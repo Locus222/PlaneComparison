@@ -1392,20 +1392,20 @@ document.getElementById('btn-compute').addEventListener('click', doCompute);
 function getHgGroups() {
   const wu    = WEIGHT_LABELS[getWeightUnit()] || 'kg';
   const vu    = VOLUME_LABELS[getVolumeUnit()] || 'l';
-  const su    = SPEED_LABELS[getSpeedUnit()]   || 'kt';
-  const ffu   = FFPH_LABELS[getVolumeUnit()]   || 'gph';
-  const distU = getSpeedUnit() === 'kmh' ? 'km' : 'NM';
+  const su    = SPEED_LABELS[getSpeedUnit()]   || 'km/h';
+  const ffu   = FFPH_LABELS[getVolumeUnit()]   || 'l';
+  const distU = getDistUnit() === 'km' ? 'km' : 'NM';
   return [
     { label: 'Identifikace',          keys: ['type','Manufacturer','Designation','Name'] },
     { label: 'Konfigurace',           keys: ['No. Seats','Gear Type','Fuel type'] },
-    { label: 'Rozměry (m)',           keys: ['wingspan [m]','length [m]','height [m]'] },
-    { label: `Hmotnosti (${wu})`,     keys: ['Empty Weight [kg]','MTOW [kg]','Usefull Load [kg]'] },
-    { label: `Nádrž (${vu})`,         keys: ['__fuel_cap'] },
+    { label: 'Rozměry (m)',           keys: ['Wingspan [m]','Length [m]','Height [m]'] },
+    { label: `Hmotnosti (${wu})`,     keys: ['Empty Weight [kg]','MTOW [kg]','Useful Load [kg]'] },
+    { label: `Nádrž (${vu})`,         keys: ['Fuel Capacity [l]'] },
     { label: 'Motor',                 keys: ['Engine Manufacturer','Engine type','No. pistons','Engine power [HP]','Engine power [kW]'] },
-    { label: `Rychlosti (${su})`,     keys: ['Vcruise 75%','Vcruise 65%','Vcruise 55%','Stall Speed Vs0 (FF)','Vs1 – Stall speed (clean)','Vx – Best angle of climb speed','Vy – Best rate of climb speed','Vno – Normal operating speed','Vne – Never exceed speed'] },
-    { label: `Dolet (${distU})`,      keys: ['Range max power [NM]','Range economy cruise[NM]'] },
-    { label: `Spotřeba (${ffu}/h)`,   keys: ['FuelFlow_75_gph','FuelFlow_55_gph'] },
-    { label: 'Náklady (CZK)',         keys: ['Fixed cost 80h/y [CZK]','Variable cost 80h/y [CZK]'] },
+    { label: `Rychlosti (${su})`,     keys: ['Vcruise_75 [km/h]','Vcruise_65 [km/h]','Vcruise_55 [km/h]','Vs0 [km/h]','Vs1 [km/h]','Vx [km/h]','Vy [km/h]','Vno [km/h]','Vne [km/h]'] },
+    { label: `Spotřeba (${ffu}/h)`,   keys: ['FF_75 [l/h]','FF_55 [l/h]'] },
+    { label: `Dolet (${distU})`,      keys: ['Range_MP [km]','Range_EC [km]'] },
+    { label: 'Náklady (CZK/rok)',     keys: ['Fixed cost [CZK/yr]','Variable cost [CZK/yr]'] },
   ];
 }
 
@@ -1413,18 +1413,18 @@ function getHgGroups() {
 const HG_LABELS = {
   'type': 'Typ', 'Manufacturer': 'Výrobce', 'Designation': 'Model', 'Name': 'Název',
   'No. Seats': 'Sedadel', 'Gear Type': 'Podvozek', 'Fuel type': 'Palivo',
-  'wingspan [m]': 'Rozpětí', 'length [m]': 'Délka', 'height [m]': 'Výška',
-  'Empty Weight [kg]': 'Prázdná', 'MTOW [kg]': 'MTOW', 'Usefull Load [kg]': 'Užit. zát.',
-  '__fuel_cap': 'Nádrž',
-  'Engine Manufacturer': 'Výrobce', 'Engine type': 'Typ', 'No. pistons': 'Válce',
+  'Wingspan [m]': 'Rozpětí', 'Length [m]': 'Délka', 'Height [m]': 'Výška',
+  'Empty Weight [kg]': 'Prázdná', 'MTOW [kg]': 'MTOW', 'Useful Load [kg]': 'Užit. zát.',
+  'Fuel Capacity [l]': 'Nádrž',
+  'Engine Manufacturer': 'Výrobce mot.', 'Engine type': 'Motor', 'No. pistons': 'Válce',
   'Engine power [HP]': 'HP', 'Engine power [kW]': 'kW',
-  'Vcruise 75%': '75%', 'Vcruise 65%': '65%', 'Vcruise 55%': '55%',
-  'Stall Speed Vs0 (FF)': 'Vs0', 'Vs1 – Stall speed (clean)': 'Vs1',
-  'Vx – Best angle of climb speed': 'Vx', 'Vy – Best rate of climb speed': 'Vy',
-  'Vno – Normal operating speed': 'Vno', 'Vne – Never exceed speed': 'Vne',
-  'Range max power [NM]': 'Max Power', 'Range economy cruise[NM]': 'Economy',
-  'FuelFlow_75_gph': '75%', 'FuelFlow_55_gph': '55%',
-  'Fixed cost 80h/y [CZK]': 'Fixní', 'Variable cost 80h/y [CZK]': 'Variabilní',
+  'Vcruise_75 [km/h]': '75%', 'Vcruise_65 [km/h]': '65%', 'Vcruise_55 [km/h]': '55%',
+  'Vs0 [km/h]': 'Vs0', 'Vs1 [km/h]': 'Vs1',
+  'Vx [km/h]': 'Vx', 'Vy [km/h]': 'Vy',
+  'Vno [km/h]': 'Vno', 'Vne [km/h]': 'Vne',
+  'FF_75 [l/h]': '75%', 'FF_55 [l/h]': '55%',
+  'Range_MP [km]': 'Max Power', 'Range_EC [km]': 'Economy',
+  'Fixed cost [CZK/yr]': 'Fixní', 'Variable cost [CZK/yr]': 'Variabilní',
 };
 
 // Tooltip texty zobrazené po najetí myší na záhlaví sloupce
@@ -1436,85 +1436,59 @@ const HG_TOOLTIPS = {
   'No. Seats': 'Počet sedadel včetně pilota',
   'Gear Type': 'Typ podvozku (pevný / zatažitelný)',
   'Fuel type': 'Typ paliva (AVGAS 100LL / Jet-A1)',
-  'wingspan [m]': 'Rozpětí křídel [m]',
-  'length [m]': 'Délka trupu [m]',
-  'height [m]': 'Výška letadla [m]',
+  'Wingspan [m]': 'Rozpětí křídel [m]',
+  'Length [m]': 'Délka trupu [m]',
+  'Height [m]': 'Výška letadla [m]',
   'Empty Weight [kg]': 'Prázdná hmotnost letadla',
   'MTOW [kg]': 'Maximum Take-Off Weight – maximální vzletová hmotnost',
-  'Usefull Load [kg]': 'Užitečná zátěž = MTOW − prázdná hmotnost',
-  '__fuel_cap': 'Kapacita palivových nádrží',
+  'Useful Load [kg]': 'Užitečná zátěž = MTOW − prázdná hmotnost',
+  'Fuel Capacity [l]': 'Kapacita palivových nádrží',
   'Engine Manufacturer': 'Výrobce motoru',
   'Engine type': 'Typ / označení motoru',
   'No. pistons': 'Počet válců motoru',
   'Engine power [HP]': 'Výkon motoru v koních (HP)',
   'Engine power [kW]': 'Výkon motoru v kilowattech (kW)',
-  'Vcruise 75%': 'Cestovní rychlost při 75% výkonu',
-  'Vcruise 65%': 'Cestovní rychlost při 65% výkonu',
-  'Vcruise 55%': 'Cestovní rychlost při 55% výkonu (economy)',
-  'Stall Speed Vs0 (FF)': 'Vs0 – Pádová rychlost s vysunutými klapkami (přistávací konfigurace)',
-  'Vs1 – Stall speed (clean)': 'Vs1 – Pádová rychlost v čisté konfiguraci (bez klapek)',
-  'Vx – Best angle of climb speed': 'Vx – Rychlost nejlepšího úhlu stoupání (největší výška na nejkratší vzdálenost)',
-  'Vy – Best rate of climb speed': 'Vy – Rychlost nejlepší rychlosti stoupání (největší výška za jednotku času)',
-  'Vno – Normal operating speed': 'Vno – Maximální rychlost v normálním provozu (plynulý vzduch)',
-  'Vne – Never exceed speed': 'Vne – Nikdy nepřekračovatelná rychlost',
-  'Range max power [NM]': 'Dolet při maximálním výkonu (75%)',
-  'Range economy cruise[NM]': 'Dolet při ekonomickém cestování (55%)',
-  'FuelFlow_75_gph': 'Spotřeba paliva při 75% výkonu',
-  'FuelFlow_55_gph': 'Spotřeba paliva při 55% výkonu (economy)',
-  'Fixed cost 80h/y [CZK]': 'Roční fixní náklady (pojištění, hangár, údržba…) přepočtené na 80 h/rok',
-  'Variable cost 80h/y [CZK]': 'Roční variabilní náklady (revize, přistání…) přepočtené na 80 h/rok',
+  'Vcruise_75 [km/h]': 'Cestovní rychlost při 75% výkonu',
+  'Vcruise_65 [km/h]': 'Cestovní rychlost při 65% výkonu',
+  'Vcruise_55 [km/h]': 'Cestovní rychlost při 55% výkonu (economy)',
+  'Vs0 [km/h]': 'Vs0 – Pádová rychlost s vysunutými klapkami (přistávací konfigurace)',
+  'Vs1 [km/h]': 'Vs1 – Pádová rychlost v čisté konfiguraci (bez klapek)',
+  'Vx [km/h]': 'Vx – Rychlost nejlepšího úhlu stoupání (největší výška na nejkratší vzdálenost)',
+  'Vy [km/h]': 'Vy – Rychlost nejlepší rychlosti stoupání (největší výška za jednotku času)',
+  'Vno [km/h]': 'Vno – Maximální rychlost v normálním provozu (plynulý vzduch)',
+  'Vne [km/h]': 'Vne – Nikdy nepřekračovatelná rychlost',
+  'FF_75 [l/h]': 'Spotřeba paliva při 75% výkonu [l/h]',
+  'FF_55 [l/h]': 'Spotřeba paliva při 55% výkonu (economy) [l/h]',
+  'Range_MP [km]': 'Dolet při maximálním výkonu (75%)',
+  'Range_EC [km]': 'Dolet při ekonomickém cestování (55%)',
+  'Fixed cost [CZK/yr]': 'Roční fixní náklady (pojištění, hangár, údržba…)',
+  'Variable cost [CZK/yr]': 'Roční variabilní náklady (revize, přistání…)',
 };
 
-// Sloupce obsahující hmotnosti v kg (ze CSV)
-const HG_WEIGHT_KEYS = new Set(['Empty Weight [kg]','MTOW [kg]','Usefull Load [kg]']);
-// Rychlosti v kt (ze CSV)
-const HG_SPEED_KT_KEYS = new Set(['Vcruise 75%','Vcruise 65%','Vcruise 55%',
-  'Stall Speed Vs0 (FF)','Vs1 – Stall speed (clean)',
-  'Vx – Best angle of climb speed','Vy – Best rate of climb speed',
-  'Vno – Normal operating speed','Vne – Never exceed speed']);
-// Dolet v NM (ze CSV)
-const HG_DIST_NM_KEYS = new Set(['Range max power [NM]','Range economy cruise[NM]']);
-// Spotřeba v gph (ze CSV)
-const HG_GPH_KEYS = new Set(['FuelFlow_75_gph','FuelFlow_55_gph']);
+// Sloupce obsahující hmotnosti v kg (ze CSV – základní jednotka)
+const HG_WEIGHT_KEYS = new Set(['Empty Weight [kg]','MTOW [kg]','Useful Load [kg]']);
+// Rychlosti v km/h (ze CSV – základní jednotka)
+const HG_SPEED_KMH_KEYS = new Set(['Vcruise_75 [km/h]','Vcruise_65 [km/h]','Vcruise_55 [km/h]',
+  'Vs0 [km/h]','Vs1 [km/h]','Vx [km/h]','Vy [km/h]','Vno [km/h]','Vne [km/h]']);
+// Dolet v km (ze CSV – základní jednotka)
+const HG_DIST_KM_KEYS = new Set(['Range_MP [km]','Range_EC [km]']);
+// Spotřeba v l/h (ze CSV – základní jednotka)
+const HG_LPH_KEYS = new Set(['FF_75 [l/h]','FF_55 [l/h]']);
+// Kapacita nádrže v litrech (ze CSV)
+const HG_VOL_L_KEYS = new Set(['Fuel Capacity [l]']);
 
 let hgData = [];      // všechna data z API (řádky)
-let hgCols = [];      // zobrazené sloupce (po přemapování obsahuje __fuel_cap)
+let hgCols = [];      // zobrazené sloupce
 let hgSortCol = null;
 let hgSortAsc = true;
 let hgFilteredData = [];
 
 /**
- * Přemapuje sloupce z API: Fuel Capacity [liters] + Fuel Capacity [gal US]
- * → jeden virtuální klíč __fuel_cap (hodnota = litry ze CSV).
- * Zároveň vloží __fuel_cap na místo prvního z obou fuel sloupců.
+ * Nové CSV má jediný sloupec 'Fuel Capacity [l]' – žádné remapování není potřeba.
+ * Funkce zůstává pro zpětnou kompatibilitu, ale projde beze změny.
  */
 function remapFuelCols(cols, rows) {
-  const litKey = 'Fuel Capacity [liters]';
-  const galKey = 'Fuel Capacity [gal US]';
-  const litIdx = cols.indexOf(litKey);
-  const galIdx = cols.indexOf(galKey);
-  if (litIdx === -1 && galIdx === -1) return { cols, rows }; // CSV nemá fuel sloupce
-
-  // Nové pořadí sloupců: vložíme __fuel_cap na místo prvního z dvojice, druhý vynecháme
-  const insertAt = Math.min(...[litIdx, galIdx].filter(i => i !== -1));
-  const newCols = cols.filter(c => c !== litKey && c !== galKey);
-  newCols.splice(insertAt, 0, '__fuel_cap');
-
-  // Do každého řádku přidáme __fuel_cap = hodnota v litrech
-  const newRows = rows.map(r => {
-    const rec = { ...r };
-    // Preferujeme litry; fallback na US gal převedený na litry
-    if (rec[litKey] != null) {
-      rec['__fuel_cap'] = rec[litKey];
-    } else if (rec[galKey] != null) {
-      rec['__fuel_cap'] = rec[galKey] / L_TO_USG;
-    } else {
-      rec['__fuel_cap'] = null;
-    }
-    return rec;
-  });
-
-  return { cols: newCols, rows: newRows };
+  return { cols, rows };
 }
 
 function hgFmt(v, key) {
@@ -1528,8 +1502,8 @@ function hgFmt(v, key) {
     return Math.round(conv).toLocaleString('cs-CZ');
   }
 
-  // Virtuální nádrž: vždy v litrech → převod na zvolenou jednotku
-  if (key === '__fuel_cap') {
+  // Kapacita nádrže v litrech → převod na zvolený objem
+  if (HG_VOL_L_KEYS.has(key)) {
     const u = getVolumeUnit();
     let conv = n;
     if (u === 'usg') conv = n * L_TO_USG;
@@ -1537,27 +1511,27 @@ function hgFmt(v, key) {
     return (+conv.toFixed(1)).toLocaleString('cs-CZ');
   }
 
-  // Rychlosti v kt
-  if (HG_SPEED_KT_KEYS.has(key)) {
-    const conv = getSpeedUnit() === 'kmh' ? n * KT_TO_KMH : n;
+  // Rychlosti v km/h → kt pokud zvoleno
+  if (HG_SPEED_KMH_KEYS.has(key)) {
+    const conv = getSpeedUnit() === 'kt' ? n / KT_TO_KMH : n;
     return Math.round(conv).toLocaleString('cs-CZ');
   }
 
-  // Dolet v NM
-  if (HG_DIST_NM_KEYS.has(key)) {
-    const conv = getSpeedUnit() === 'kmh' ? n * KT_TO_KMH : n;
+  // Dolet v km → NM pokud zvoleno
+  if (HG_DIST_KM_KEYS.has(key)) {
+    const conv = getDistUnit() === 'nm' ? n / NM_TO_KM : n;
     return Math.round(conv).toLocaleString('cs-CZ');
   }
 
-  // Spotřeba v gph → převod na zvolený objem/h
-  if (HG_GPH_KEYS.has(key)) {
-    const lph = n * GPH_TO_LPH;
+  // Spotřeba l/h → převod na zvolený objem/h
+  if (HG_LPH_KEYS.has(key)) {
     const u = getVolumeUnit();
-    let conv = lph;
-    if (u === 'usg') conv = lph * L_TO_USG;
-    else if (u === 'img') conv = lph * L_TO_IMG;
+    let conv = n;
+    if (u === 'usg') conv = n * L_TO_USG;
+    else if (u === 'img') conv = n * L_TO_IMG;
     return (+conv.toFixed(1)).toLocaleString('cs-CZ');
   }
+
 
   // Ostatní čísla
   return Number.isInteger(n) ? n.toLocaleString('cs-CZ')
