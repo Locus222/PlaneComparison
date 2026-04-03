@@ -2,12 +2,12 @@
 
 ## PlaneComparison – Webová aplikace pro porovnání letadel
 
-| Položka | Hodnota |
-|---|---|
-| **Verze dokumentu** | 1.1 |
-| **Datum** | 2026-03-30 |
-| **Projekt** | PlaneComparison |
-| **Jazyk aplikace** | Čeština (UI), Python + JavaScript (implementace) |
+| Položka             | Hodnota                                          |
+|---------------------|--------------------------------------------------|
+| **Verze dokumentu** | 1.1                                              |
+| **Datum**           | 2026-03-30                                       |
+| **Projekt**         | PlaneComparison                                  |
+| **Jazyk aplikace**  | Čeština (UI), Python + JavaScript (implementace) |
 
 ---
 
@@ -33,33 +33,33 @@ Piloti a provozovatelé malých letadel (GA), kteří potřebují porovnat ekono
 
 ### 1.4 Definice a zkratky
 
-| Zkratka | Význam |
-|---|---|
-| GA | General Aviation – všeobecné letectví |
-| SEP | Single Engine Piston – jednomotorové pístové letadlo |
-| MEP | Multi Engine Piston – vícemotorové pístové letadlo |
-| MTOW | Maximum Take-Off Weight – maximální vzletová hmotnost |
-| AVGAS | Aviation Gasoline 100LL – letecký benzin |
-| JET A-1 | Letecký petrolej (kerosín) |
-| FOB | Fuel On Board – palivo na palubě |
-| NM | Nautical Mile – námořní míle (1.852 km) |
-| kt | Knot – uzel (1.852 km/h) |
-| GPH | Gallons Per Hour – galony za hodinu (US gal) |
-| LPH | Litres Per Hour – litry za hodinu |
-| POH | Pilot's Operating Handbook – provozní příručka letadla |
-| VFR | Visual Flight Rules – pravidla letu za viditelnosti |
-| Vs0 | Pádová rychlost v přistávací konfiguraci (klapky) |
-| Vs1 | Pádová rychlost v čisté konfiguraci (bez klapek) |
-| Vx | Rychlost nejlepšího úhlu stoupání |
-| Vy | Rychlost nejlepší rychlosti stoupání |
-| Vno | Maximální rychlost v normálním provozu |
-| Vne | Nikdy nepřekračovatelná rychlost |
-| Va | Manévrovací rychlost |
-| CpDis | Cost per Distance – náklad na jednotku vzdálenosti |
-| CpSeat | Cost per Seat – náklad na sedadlo |
-| CpOSeat | Cost per Occupied Seat – náklad na obsazené sedadlo |
-| MP | Max Power – režim maximálního výkonu (75 %) |
-| EC | Economy Cruise – ekonomický cestovní režim (55 %) |
+| Zkratka | Význam                                                 |
+|---------|--------------------------------------------------------|
+| GA      | General Aviation – všeobecné letectví                  |
+| SEP     | Single Engine Piston – jednomotorové pístové letadlo   |
+| MEP     | Multi Engine Piston – vícemotorové pístové letadlo     |
+| MTOW    | Maximum Take-Off Weight – maximální vzletová hmotnost  |
+| AVGAS   | Aviation Gasoline 100LL – letecký benzin               |
+| JET A-1 | Letecký petrolej (kerosín)                             |
+| FOB     | Fuel On Board – palivo na palubě                       |
+| NM      | Nautical Mile – námořní míle (1.852 km)                |
+| kt      | Knot – uzel (1.852 km/h)                               |
+| GPH     | Gallons Per Hour – galony za hodinu (US gal)           |
+| LPH     | Litres Per Hour – litry za hodinu                      |
+| POH     | Pilot's Operating Handbook – provozní příručka letadla |
+| VFR     | Visual Flight Rules – pravidla letu za viditelnosti    |
+| Vs0     | Pádová rychlost v přistávací konfiguraci (klapky)      |
+| Vs1     | Pádová rychlost v čisté konfiguraci (bez klapek)       |
+| Vx      | Rychlost nejlepšího úhlu stoupání                      |
+| Vy      | Rychlost nejlepší rychlosti stoupání                   |
+| Vno     | Maximální rychlost v normálním provozu                 |
+| Vne     | Nikdy nepřekračovatelná rychlost                       |
+| Va      | Manévrovací rychlost                                   |
+| CpDis   | Cost per Distance – náklad na jednotku vzdálenosti     |
+| CpSeat  | Cost per Seat – náklad na sedadlo                      |
+| CpOSeat | Cost per Occupied Seat – náklad na obsazené sedadlo    |
+| MP      | Max Power – režim maximálního výkonu (75 %)            |
+| EC      | Economy Cruise – ekonomický cestovní režim (55 %)      |
 
 ---
 
@@ -103,17 +103,17 @@ Aplikace je samostatná webová aplikace bez externích databází. Data letadel
 
 ### 2.3 Technologický stack
 
-| Vrstva | Technologie | Verze |
-|---|---|---|
-| Backend framework | Flask | 3.1.3 |
-| WSGI server | Werkzeug | 3.1.7 |
-| Šablonovací engine | Jinja2 | 3.1.6 |
-| Datové zpracování | Pandas | 3.0.1 |
-| Numerické výpočty | NumPy | 2.4.3 |
-| Frontend | Vanilla JavaScript (ES6+), HTML5, CSS3 | – |
-| Testovací framework | Pytest + Playwright | – |
-| Nasazení | Vercel (serverless Python) | – |
-| Jazyk | Python 3.13+ | – |
+| Vrstva              | Technologie                            | Verze |
+|---------------------|----------------------------------------|-------|
+| Backend framework   | Flask                                  | 3.1.3 |
+| WSGI server         | Werkzeug                               | 3.1.7 |
+| Šablonovací engine  | Jinja2                                 | 3.1.6 |
+| Datové zpracování   | Pandas                                 | 3.0.1 |
+| Numerické výpočty   | NumPy                                  | 2.4.3 |
+| Frontend            | Vanilla JavaScript (ES6+), HTML5, CSS3 | –     |
+| Testovací framework | Pytest + Playwright                    | –     |
+| Nasazení            | Vercel (serverless Python)             | –     |
+| Jazyk               | Python 3.13+                           | –     |
 
 ### 2.4 Databáze letadel
 
@@ -131,38 +131,38 @@ Databáze je uložena v souboru `plane_table.csv` (39 sloupců, 37 letadel) a ob
 
 CSV soubor ukládá všechny hodnoty v **metrických/SI jednotkách**:
 
-| Veličina | Jednotka v CSV | Příklad sloupce |
-|---|---|---|
-| Hmotnost | kg | `Empty Weight [kg]`, `MTOW [kg]`, `Useful Load [kg]` |
-| Objem (palivo) | litry | `Fuel Capacity [l]` |
-| Rychlost | km/h | `Vcruise_75 [km/h]`, `Vs1 [km/h]` |
-| Spotřeba | l/h | `FF_75 [l/h]`, `FF_55 [l/h]` |
-| Vzdálenost (dolet) | km | `Range_MP [km]`, `Range_EC [km]` |
-| Náklady | CZK/rok | `Fixed cost [CZK/yr]`, `Variable cost [CZK/yr]` |
-| Rozměry | m | `Wingspan [m]`, `Length [m]`, `Height [m]` |
+| Veličina           | Jednotka v CSV | Příklad sloupce                                      |
+|--------------------|----------------|------------------------------------------------------|
+| Hmotnost           | kg             | `Empty Weight [kg]`, `MTOW [kg]`, `Useful Load [kg]` |
+| Objem (palivo)     | litry          | `Fuel Capacity [l]`                                  |
+| Rychlost           | km/h           | `Vcruise_75 [km/h]`, `Vs1 [km/h]`                    |
+| Spotřeba           | l/h            | `FF_75 [l/h]`, `FF_55 [l/h]`                         |
+| Vzdálenost (dolet) | km             | `Range_MP [km]`, `Range_EC [km]`                     |
+| Náklady            | CZK/rok        | `Fixed cost [CZK/yr]`, `Variable cost [CZK/yr]`      |
+| Rozměry            | m              | `Wingspan [m]`, `Length [m]`, `Height [m]`           |
 
 > **Poznámka:** Převod z letecky tradičních jednotek (kt, GPH, NM) na metrické byl proveden jednorázově. Backend (`app.py`) interně přepočítává km/h → kt a l/h → GPH pro letové výpočty.
 
 #### 2.4.2 Struktura sloupců CSV
 
-| # | Sloupec | Skupina | Popis |
-|---|---|---|---|
-| 0 | `type` | Identifikace | Kategorie letadla (SEP / MEP) |
-| 1 | `Manufacturer` | Identifikace | Výrobce |
-| 2 | `Designation` | Identifikace | Typové označení |
-| 3 | `Name` | Identifikace | Obchodní název |
-| 4 | `No. Seats` | Konfigurace | Počet sedadel |
-| 5 | `Gear Type` | Konfigurace | Typ podvozku |
-| 6–8 | `Wingspan [m]`, `Length [m]`, `Height [m]` | Rozměry | Rozměry letadla |
-| 9–11 | `Empty Weight [kg]`, `MTOW [kg]`, `Useful Load [kg]` | Hmotnosti | Hmotnostní údaje |
-| 12–16 | `Engine Manufacturer`, `Engine type`, `No. pistons`, `Engine power [kW]`, `Engine power [HP]` | Motor | Pohonná jednotka |
-| 17 | `Fuel type` | Palivo | Typ paliva (AVGAS 100LL / JET A1 / MOGAS) |
-| 18 | `Fuel Capacity [l]` | Palivo | Kapacita nádrže [l] – jeden sloupec |
-| 19–22 | `FF_75 [l/h]`, `FF_65 [l/h]`, `FF_55 [l/h]`, `FF_45 [l/h]` | Spotřeba | Spotřeba paliva při 75%/65%/55%/45% výkonu |
-| 23–27 | `Vcruise [km/h]`, `Vcruise_75..45 [km/h]` | Rychlosti | Cestovní rychlosti |
-| 28–34 | `Vs0..Va [km/h]` | Rychlosti | Charakteristické rychlosti |
-| 35–36 | `Range_MP [km]`, `Range_EC [km]` | Dolet | Dolet max power / economy |
-| 37–38 | `Fixed cost [CZK/yr]`, `Variable cost [CZK/yr]` | Ekonomika | Roční náklady |
+| #     | Sloupec                                                                                       | Skupina      | Popis                                      |
+|-------|-----------------------------------------------------------------------------------------------|--------------|--------------------------------------------|
+| 0     | `type`                                                                                        | Identifikace | Kategorie letadla (SEP / MEP)              |
+| 1     | `Manufacturer`                                                                                | Identifikace | Výrobce                                    |
+| 2     | `Designation`                                                                                 | Identifikace | Typové označení                            |
+| 3     | `Name`                                                                                        | Identifikace | Obchodní název                             |
+| 4     | `No. Seats`                                                                                   | Konfigurace  | Počet sedadel                              |
+| 5     | `Gear Type`                                                                                   | Konfigurace  | Typ podvozku                               |
+| 6–8   | `Wingspan [m]`, `Length [m]`, `Height [m]`                                                    | Rozměry      | Rozměry letadla                            |
+| 9–11  | `Empty Weight [kg]`, `MTOW [kg]`, `Useful Load [kg]`                                          | Hmotnosti    | Hmotnostní údaje                           |
+| 12–16 | `Engine Manufacturer`, `Engine type`, `No. pistons`, `Engine power [kW]`, `Engine power [HP]` | Motor        | Pohonná jednotka                           |
+| 17    | `Fuel type`                                                                                   | Palivo       | Typ paliva (AVGAS 100LL / JET A1 / MOGAS)  |
+| 18    | `Fuel Capacity [l]`                                                                           | Palivo       | Kapacita nádrže [l] – jeden sloupec        |
+| 19–22 | `FF_75 [l/h]`, `FF_65 [l/h]`, `FF_55 [l/h]`, `FF_45 [l/h]`                                    | Spotřeba     | Spotřeba paliva při 75%/65%/55%/45% výkonu |
+| 23–27 | `Vcruise [km/h]`, `Vcruise_75..45 [km/h]`                                                     | Rychlosti    | Cestovní rychlosti                         |
+| 28–34 | `Vs0..Va [km/h]`                                                                              | Rychlosti    | Charakteristické rychlosti                 |
+| 35–36 | `Range_MP [km]`, `Range_EC [km]`                                                              | Dolet        | Dolet max power / economy                  |
+| 37–38 | `Fixed cost [CZK/yr]`, `Variable cost [CZK/yr]`                                               | Ekonomika    | Roční náklady                              |
 
 ---
 
@@ -170,13 +170,13 @@ CSV soubor ukládá všechny hodnoty v **metrických/SI jednotkách**:
 
 ### 3.1 Uživatelské rozhraní – Layout
 
-| ID | Požadavek | Priorita |
-|---|---|---|
-| FR-UI-001 | Aplikace je rozdělena vertikálně na horní panel (vstupní karty) a dolní panel (výsledková tabulka) | Musí |
-| FR-UI-002 | Horní panel obsahuje záložky: **Obecné**, **Plán**, **Obsazení**, **Hangár** | Musí |
-| FR-UI-003 | Při přepnutí na záložku Hangár se skryje dolní panel s výsledkovou tabulkou a zobrazí se samostatná tabulka hangáru | Musí |
-| FR-UI-004 | Aplikace používá tmavé barevné schéma (dark mode) | Musí |
-| FR-UI-005 | Uživatel může přepínat velikost písma: Small (13 px), Medium (15 px), Large (17 px) | Musí |
+| ID        | Požadavek                                                                                                           | Priorita |
+|-----------|---------------------------------------------------------------------------------------------------------------------|----------|
+| FR-UI-001 | Aplikace je rozdělena vertikálně na horní panel (vstupní karty) a dolní panel (výsledková tabulka)                  | Musí     |
+| FR-UI-002 | Horní panel obsahuje záložky: **Obecné**, **Plán**, **Obsazení**, **Hangár**                                        | Musí     |
+| FR-UI-003 | Při přepnutí na záložku Hangár se skryje dolní panel s výsledkovou tabulkou a zobrazí se samostatná tabulka hangáru | Musí     |
+| FR-UI-004 | Aplikace používá tmavé barevné schéma (dark mode)                                                                   | Musí     |
+| FR-UI-005 | Uživatel může přepínat velikost písma: Small (13 px), Medium (15 px), Large (17 px)                                 | Musí     |
 
 ---
 
@@ -184,26 +184,26 @@ CSV soubor ukládá všechny hodnoty v **metrických/SI jednotkách**:
 
 #### 3.2.1 Vstupní pole
 
-| ID | Pole | Klíč | Typ | Výchozí hodnota | Jednotka | Popis |
-|---|---|---|---|---|---|---|
-| FR-GEN-001 | Cena AVGAS | `avgas_price` | číslo | 75.0 | CZK/l | Cena paliva AVGAS 100LL |
-| FR-GEN-002 | Cena JET A-1 | `jet_a1_price` | číslo | 45.0 | CZK/l | Cena paliva JET A-1 |
-| FR-GEN-003 | Hustota AVGAS | `avgas_density` | číslo | 0.72 | kg/l | Hustota AVGAS při 15 °C |
-| FR-GEN-004 | Hustota JET A-1 | `jet_a1_density` | číslo | 0.81 | kg/l | Hustota JET A-1 při 15 °C |
-| FR-GEN-005 | Palivová rezerva | `fuel_reserve_min` | celé číslo | 30 | min | Min. VFR rezerva při economy cruise |
-| FR-GEN-006 | Průměrná váha osoby | `person_weight_kg` | číslo | 95 | kg | Výchozí váha pilota/cestujícího |
-| FR-GEN-007 | Průměrné zavazadlo/sedadlo | `baggage_per_seat_kg` | číslo | 5 | kg | Průměrná váha zavazadla na sedadlo |
-| FR-GEN-008 | Nalétané hodiny ročně | `annual_hours` | číslo | 80 | h/rok | Pro přepočet fixních a variabilních nákladů na hodinu |
+| ID         | Pole                       | Klíč                  | Typ        | Výchozí hodnota | Jednotka | Popis                                                 |
+|------------|----------------------------|-----------------------|------------|-----------------|----------|-------------------------------------------------------|
+| FR-GEN-001 | Cena AVGAS                 | `avgas_price`         | číslo      | 75.0            | CZK/l    | Cena paliva AVGAS 100LL                               |
+| FR-GEN-002 | Cena JET A-1               | `jet_a1_price`        | číslo      | 45.0            | CZK/l    | Cena paliva JET A-1                                   |
+| FR-GEN-003 | Hustota AVGAS              | `avgas_density`       | číslo      | 0.72            | kg/l     | Hustota AVGAS při 15 °C                               |
+| FR-GEN-004 | Hustota JET A-1            | `jet_a1_density`      | číslo      | 0.81            | kg/l     | Hustota JET A-1 při 15 °C                             |
+| FR-GEN-005 | Palivová rezerva           | `fuel_reserve_min`    | celé číslo | 30              | min      | Min. VFR rezerva při economy cruise                   |
+| FR-GEN-006 | Průměrná váha osoby        | `person_weight_kg`    | číslo      | 95              | kg       | Výchozí váha pilota/cestujícího                       |
+| FR-GEN-007 | Průměrné zavazadlo/sedadlo | `baggage_per_seat_kg` | číslo      | 5               | kg       | Průměrná váha zavazadla na sedadlo                    |
+| FR-GEN-008 | Nalétané hodiny ročně      | `annual_hours`        | číslo      | 80              | h/rok    | Pro přepočet fixních a variabilních nákladů na hodinu |
 
 #### 3.2.2 Přepínače jednotek
 
-| ID | Přepínač | Volby | Výchozí | Popis |
-|---|---|---|---|---|
-| FR-GEN-010 | Váha | kg / lb | kg | Jednotka hmotnosti pro zobrazení |
-| FR-GEN-011 | Objem | litr / US gal / Imp gal | litr | Jednotka objemu pro zobrazení |
-| FR-GEN-012 | Rychlost | kt / km/h | kt | Jednotka rychlosti pro zobrazení |
-| FR-GEN-013 | Vzdálenost | NM / km | NM | Jednotka vzdálenosti pro zobrazení a výpočet CpDis |
-| FR-GEN-014 | Měna | CZK / EUR / USD / GBP | CZK | Měna pro zobrazení nákladů |
+| ID | Přepínač   | Volby                   | Výchozí | Popis                                               |
+|---|------------|-------------------------|---------|-----------------------------------------------------|
+| FR-GEN-010 | Váha       | kg / lb                 | kg      | Jednotka hmotnosti pro zobrazení                    |
+| FR-GEN-011 | Objem      | litr / US gal / Imp gal | litr    | Jednotka objemu pro zobrazení                       |
+| FR-GEN-012 | Rychlost   | kt / km/h               | kt      | Jednotka rychlosti pro zobrazení                    |
+| FR-GEN-013 | Vzdálenost | NM / km                 | NM      | Jednotka vzdálenosti pro zobrazení a výpočet CpDis  |
+| FR-GEN-014 | Měna       | CZK / EUR / USD / GBP   | CZK     | Měna pro zobrazení nákladů                          |
 
 #### 3.2.3 Kurzovní lístek
 
@@ -462,35 +462,35 @@ CSV soubor ukládá všechny hodnoty v **metrických/SI jednotkách**:
 
 #### 3.10.1 `POST /api/compute`
 
-| Vlastnost | Hodnota |
-|---|---|
-| Metoda | POST |
-| Content-Type | application/json |
-| Vstup | JSON objekt se všemi parametry z karet Obecné + Plán + Obsazení |
-| Výstup | JSON: `{ ok, planes[], currency, currency_symbol, weight_unit, volume_unit, total_pax_kg, occupied_seats }` |
+| Vlastnost    | Hodnota                                                                                                     |
+|--------------|-------------------------------------------------------------------------------------------------------------|
+| Metoda       | POST                                                                                                        |
+| Content-Type | application/json                                                                                            |
+| Vstup        | JSON objekt se všemi parametry z karet Obecné + Plán + Obsazení                                             |
+| Výstup       | JSON: `{ ok, planes[], currency, currency_symbol, weight_unit, volume_unit, total_pax_kg, occupied_seats }` |
 
 **Vstupní parametry:**
 
-| Parametr | Typ | Popis |
-|---|---|---|
-| `avgas_price` | float | Cena AVGAS [CZK/l] |
-| `jet_a1_price` | float | Cena JET A-1 [CZK/l] |
-| `avgas_density` | float | Hustota AVGAS [kg/l] |
-| `jet_a1_density` | float | Hustota JET A-1 [kg/l] |
-| `fuel_reserve_min` | float | Palivová rezerva [min] |
-| `person_weight_kg` | float | Průměrná váha osoby [kg] |
-| `baggage_per_seat_kg` | float | Průměrné zavazadlo [kg] |
-| `annual_hours` | float | Nalétané hodiny/rok (min. 1) |
-| `currency` | string | Zvolená měna (CZK/EUR/USD/GBP) |
-| `eur_to_czk` | float | Kurz 1 EUR = X CZK |
-| `usd_to_czk` | float | Kurz 1 USD = X CZK |
-| `gbp_to_czk` | float | Kurz 1 GBP = X CZK |
-| `weight_unit` | string | Jednotka hmotnosti (kg/lb) |
-| `volume_unit` | string | Jednotka objemu (l/usg/img) |
-| `distance_nm` | float | Vzdálenost [NM] |
-| `wind_kt` | float | Složka větru [kt] |
-| `pax1_weight`..`pax6_weight` | float | Váhy cestujících |
-| `pax1_baggage`..`pax6_baggage` | float | Zavazadla cestujících |
+| Parametr                       | Typ    | Popis                          |
+|--------------------------------|--------|--------------------------------|
+| `avgas_price`                  | float  | Cena AVGAS [CZK/l]             |
+| `jet_a1_price`                 | float  | Cena JET A-1 [CZK/l]           |
+| `avgas_density`                | float  | Hustota AVGAS [kg/l]           |
+| `jet_a1_density`               | float  | Hustota JET A-1 [kg/l]         |
+| `fuel_reserve_min`             | float  | Palivová rezerva [min]         |
+| `person_weight_kg`             | float  | Průměrná váha osoby [kg]       |
+| `baggage_per_seat_kg`          | float  | Průměrné zavazadlo [kg]        |
+| `annual_hours`                 | float  | Nalétané hodiny/rok (min. 1)   |
+| `currency`                     | string | Zvolená měna (CZK/EUR/USD/GBP) |
+| `eur_to_czk`                   | float  | Kurz 1 EUR = X CZK             |
+| `usd_to_czk`                   | float  | Kurz 1 USD = X CZK             |
+| `gbp_to_czk`                   | float  | Kurz 1 GBP = X CZK             |
+| `weight_unit`                  | string | Jednotka hmotnosti (kg/lb)     |
+| `volume_unit`                  | string | Jednotka objemu (l/usg/img)    |
+| `distance_nm`                  | float  | Vzdálenost [NM]                |
+| `wind_kt`                      | float  | Složka větru [kt]              |
+| `pax1_weight`..`pax6_weight`   | float  | Váhy cestujících               |
+| `pax1_baggage`..`pax6_baggage` | float  | Zavazadla cestujících          |
 
 **Výstupní struktura jednoho letadla:**
 
